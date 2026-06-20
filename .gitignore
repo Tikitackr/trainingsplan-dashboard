@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+
+# Quell-Scans mit PRIVATDATEN — NIE ins öffentliche Repo
+Eingang/
+Ablage/
+*.pdf
