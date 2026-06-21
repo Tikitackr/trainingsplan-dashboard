@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mockup · Orientierungskarte</title>
+<style>
+  :root {
+    --accent: #0a84ff;
+    --accent-2: #5e5ce6;
+    --grad: linear-gradient(135deg, #0a84ff, #5e5ce6);
+    --bg-0: #0a0e17;
+    --bg-1: #0f1626;
+    --text: #e6edf3;
+    --muted: #9aa4b2;
+    --glass: rgba(255,255,255,0.07);
+    --glass-border: rgba(255,255,255,0.12);
+    --glass-edge: rgba(255,255,255,0.28);
+    --panel: rgba(18,24,38,0.72);
+    --card: rgba(16,22,36,0.66);
+    --shadow: 0 8px 32px rgba(0,0,0,0.45);
+    /* Bereichsfarben aus dem Lageplan */
+    --a: #f2cf3e; --b: #ef8b3f; --c: #e0533f;
+    --d: #5b8fd4; --e: #2fb8a6; --f: #d65f96; --k: #b06fd0;
+  }
+  [data-theme="light"] {
+    --bg-0: #e9eef6; --bg-1: #ffffff; --text: #1f2328; --muted: #5b6675;
+    --glass: rgba(255,255,255,0.60); --glass-border: rgba(255,255,255,0.7);
+    --glass-edge: rgba(255,255,255,0.9); --panel: rgba(255,255,255,0.82);
+    --card: rgba(255,255,255,0.78); --shadow: 0 8px 30px rgba(40,60,100,0.16);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text); background: var(--bg-1); line-height: 1.55; min-height: 100vh;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(60vw 60vw at 12% 8%, rgba(10,132,255,0.32), transparent 60%),
+      radial-gradient(50vw 50vw at 88% 22%, rgba(94,92,230,0.26), transparent 60%),
+      radial-gradient(55vw 55vw at 70% 90%, rgba(64,156,255,0.18), transparent 60%),
+      linear-gradient(160deg, var(--bg-0), var(--bg-1));
+  }
+  [data-theme="light"] body::before {
+    background:
+      radial-gradient(60vw 60vw at 12% 8%, rgba(0,122,255,0.14), transparent 60%),
+      radial-gradient(50vw 50vw at 88% 22%, rgba(94,92,230,0.12), transparent 60%),
+      linear-gradient(160deg, var(--bg-0), var(--bg-1));
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 14px 14px 50px; }
+
+  /* So sähe die Overlay-Kopfzeile aus */
+  .bar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .bar .ot { flex: 1 1 auto; font-weight: 700; font-size: 16px; }
+  .bar .ot .sub { display:block; font-weight:500; font-size:12.5px; color: var(--muted); margin-top:2px; }
+  .iconbtn { flex: 0 0 auto; display: grid; place-items: center; width: 40px; height: 40px;
+    border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass);
+    color: var(--text); cursor: pointer; }
+  .iconbtn svg { width: 19px; height: 19px; }
+
+  .mapcard {
+    background: var(--card); border: 1px solid var(--glass-border); border-radius: 20px;
+    box-shadow: var(--shadow), inset 0 1px 0 var(--glass-edge);
+    padding: 8px; overflow: hidden;
+  }
+  .mapcard svg { width: 100%; height: auto; display: block; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 2px 0; align-items:center; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px;
+    border-radius: 11px; background: var(--glass); border: 1px solid var(--glass-border);
+    font-size: 13px; font-weight: 600; }
+  .chip .dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 11px; }
+  /* Ebenen-Stepper: pro Termin die richtige Ebene */
+  .levels { display:inline-flex; gap:3px; padding:4px; border-radius:12px;
+    background: var(--glass); border:1px solid var(--glass-border); }
+  .levels span { padding:5px 11px; border-radius:9px; font-size:13px; font-weight:700; color:var(--muted); }
+  .levels span.on { color:#fff; background: var(--grad); }
+  .legend { margin: 16px 2px 0; color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+
+  .switch { margin: 26px auto 0; display:flex; gap:8px; justify-content:center; }
+  .switch button { padding:8px 16px; border-radius:11px; border:1px solid var(--glass-border);
+    background: var(--glass); color: var(--text); font-family:inherit; font-size:13px; cursor:pointer; }
+
+  @keyframes pulse { 0%{ r:13; opacity:.55 } 70%{ r:30; opacity:0 } 100%{ opacity:0 } }
+  .pulse { animation: pulse 2.4s ease-out infinite; transform-origin:center; }
+  @media (prefers-reduced-motion: reduce){ .pulse{ animation:none; opacity:0 } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="bar">
+      <div class="ot">Trakt E · Therapiebereich 3 · Sporthalle
+        <span class="sub">Montag 8:55 · Übungsgruppe</span>
+      </div>
+      <button class="iconbtn" onclick="toggleTheme()" aria-label="Hell/Dunkel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+      </button>
+    </div>
+
+    <div class="mapcard">
+      <svg viewBox="0 0 360 300" role="img" aria-label="Orientierungskarte Ebene 0, Ziel Trakt E">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <pattern id="baustelle" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <rect width="9" height="9" fill="#f2b21a"/>
+            <rect width="4.5" height="9" fill="#1a1a1a"/>
+          </pattern>
+          <style>
+            .blk { stroke: rgba(255,255,255,0.16); stroke-width:1.2; }
+            .lbl { fill:#fff; font: 700 12px -apple-system,sans-serif; opacity:.9; }
+            .lblsm { fill:#fff; font: 600 8px -apple-system,sans-serif; opacity:.72; }
+            [data-theme="light"] .lbl,[data-theme="light"] .lblsm { fill:#1f2328; }
+            .dim { opacity:.32; }
+            .corr { stroke: rgba(255,255,255,0.16); stroke-width:7; stroke-linecap:round; fill:none; }
+            [data-theme="light"] .corr { stroke: rgba(40,60,100,0.14); }
+          </style>
+        </defs>
+
+        <!-- ---------- Verbindungs-Korridore (dünn, neutral) ---------- -->
+        <path class="corr" d="M160 206 L150 206"/>           <!-- B -> C -->
+        <path class="corr" d="M202 207 L206 207"/>           <!-- C -> F -->
+        <path class="corr" d="M288 110 L300 96"/>            <!-- D -> E -->
+
+        <!-- ---------- Trakte (gedimmt = nur Orientierung) ---------- -->
+        <!-- A (linkes Ende höher, rechtes Ende auf B-Höhe) -->
+        <g class="dim" transform="rotate(32 80 200)">
+          <rect class="blk" x="0" y="187" width="80" height="26" rx="8" fill="var(--a)"/>
+          <text class="lbl" x="40" y="205" text-anchor="middle">A</text>
+        </g>
+        <!-- B (waagerecht, links neben C) -->
+        <g class="dim">
+          <rect class="blk" x="76" y="192" width="84" height="30" rx="8" fill="var(--b)"/>
+          <text class="lbl" x="118" y="212" text-anchor="middle">B</text>
+        </g>
+        <!-- C (langer Riegel, ganz runter zum Haupteingang) -->
+        <g>
+          <rect class="blk" x="158" y="146" width="44" height="104" rx="10" fill="var(--c)" opacity=".45"/>
+          <text class="lbl" x="180" y="206" text-anchor="middle" style="opacity:.6">C</text>
+        </g>
+        <!-- Haupteingang-Marker ganz unten an C -->
+        <g transform="translate(180 254)">
+          <path d="M0 8 L-6 -3 L6 -3 Z" fill="var(--accent)"/>
+          <text class="lblsm" x="0" y="22" text-anchor="middle" style="font:700 8.5px -apple-system,sans-serif; fill:var(--accent); opacity:1">Haupteingang</text>
+        </g>
+        <!-- F (rechts von C, auf B-Höhe) -->
+        <g class="dim">
+          <rect class="blk" x="206" y="192" width="56" height="30" rx="8" fill="var(--f)"/>
+          <text class="lbl" x="234" y="212" text-anchor="middle">F</text>
+        </g>
+        <!-- K (Kesselhaus, separates Gebäude unter F – Vorträge) -->
+        <g class="dim">
+          <rect class="blk" x="206" y="236" width="60" height="32" rx="8" fill="var(--k)"/>
+          <text class="lbl" x="236" y="252" text-anchor="middle">K</text>
+          <text class="lblsm" x="236" y="263" text-anchor="middle" style="opacity:.85">Vorträge</text>
+        </g>
+        <!-- D (Diagonale C -> E) -->
+        <g class="dim" transform="rotate(-30 250 126)">
+          <rect class="blk" x="192" y="112" width="118" height="28" rx="8" fill="var(--d)"/>
+          <text class="lbl" x="250" y="131" text-anchor="middle">D</text>
+        </g>
+
+        <!-- ---------- ZIEL: Trakt E (großes Eck-Gebäude oben rechts) ---------- -->
+        <g filter="url(#glow)">
+          <rect class="blk" x="248" y="26" width="100" height="92" rx="12" fill="var(--e)" opacity=".95"/>
+          <rect x="262" y="40" width="72" height="40" rx="6" fill="none" stroke="rgba(4,32,28,0.35)" stroke-width="1.4"/>
+        </g>
+        <text x="298" y="64" text-anchor="middle" fill="#04201c" style="font:700 20px -apple-system,sans-serif">E</text>
+        <text x="298" y="92" text-anchor="middle" fill="#04201c" style="font:700 8.5px -apple-system,sans-serif">Therapiebereich 3</text>
+        <text x="298" y="104" text-anchor="middle" fill="#04201c" style="font:600 8px -apple-system,sans-serif">Sporthalle · Ergometrie</text>
+
+        <!-- Ziel-Pin -->
+        <g transform="translate(298 24)">
+          <circle class="pulse" cx="0" cy="0" r="13" fill="#2fb8a6"/>
+          <path d="M0 -20 C 9 -20 14 -13 14 -6 C 14 3 0 14 0 14 C 0 14 -14 3 -14 -6 C -14 -13 -9 -20 0 -20 Z"
+                fill="#2fb8a6" stroke="#fff" stroke-width="2"/>
+          <circle cx="0" cy="-6" r="4.5" fill="#fff"/>
+        </g>
+
+        <!-- ---------- Baustelle (am alten Startpunkt, oberer Teil von C) ---------- -->
+        <g>
+          <rect x="156" y="150" width="48" height="42" rx="5" fill="url(#baustelle)" opacity=".6"/>
+          <!-- Warndreieck -->
+          <g transform="translate(180 144)">
+            <path d="M0 -12 L13 11 L-13 11 Z" fill="#f2b21a" stroke="#1a1a1a" stroke-width="2.2" stroke-linejoin="round"/>
+            <rect x="-1.6" y="-5" width="3.2" height="9" rx="1.4" fill="#1a1a1a"/>
+            <circle cx="0" cy="7" r="1.8" fill="#1a1a1a"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="chips">
+      <span class="levels"><span>E 1</span><span class="on">E 0</span><span>E −1</span></span>
+      <span class="chip"><span class="dot" style="background:var(--e)"></span>Ziel: Trakt E</span>
+    </div>
+
+    <p class="legend">
+      Schematische Orientierung, nicht maßstabsgetreu. Eingang über Trakt&nbsp;C, dann auf
+      Ebene&nbsp;0 zu Trakt&nbsp;E (Therapiebereich&nbsp;3, Sporthalle). Übrige Trakte nur gedimmt
+      zur groben Orientierung. Das Warndreieck markiert die aktuelle Baustelle.
+    </p>
+
+    <div class="switch">
+      <button onclick="toggleTheme()">Hell / Dunkel testen</button>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme(){
+      var r = document.documentElement;
+      r.setAttribute('data-theme', r.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    }
+  </script>
+</body>
+</html>

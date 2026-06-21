@@ -34,6 +34,9 @@
     --radius: 18px;
     --ok: #3fb950;
     --warn: #d29922;
+    /* Bereichsfarben der Trakte (aus dem Lageplan) — themenunabhängig */
+    --a: #f2cf3e; --b: #ef8b3f; --c: #e0533f;
+    --d: #5b8fd4; --e: #2fb8a6; --f: #d65f96; --k: #b06fd0;
   }
   [data-theme="light"] {
     --accent: #007aff;
@@ -149,14 +152,14 @@
   .appt .name { font-size: 15px; margin-top: 1px; }
   .appt .note { font-size: 13px; color: var(--muted); margin-top: 5px; }
   .room {
-    display: inline-flex; align-items: center; gap: 6px; margin-top: 9px;
+    display: inline-flex; align-items: flex-start; gap: 6px; margin-top: 9px;
     padding: 6px 11px; border-radius: 10px; cursor: pointer;
     background: var(--glass); border: 1px solid var(--glass-border);
     color: var(--accent); font-size: 13px; font-weight: 600; font-family: inherit;
     max-width: 100%; text-align: left;
   }
-  .room svg { width: 14px; height: 14px; flex: 0 0 14px; }
-  .room .rt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .room svg { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 2px; }
+  .room .rt { min-width: 0; white-space: normal; overflow-wrap: anywhere; line-height: 1.35; }
   .room.nomap { color: var(--muted); }
   .appt:active .room { background: var(--glass); }
 
@@ -183,9 +186,26 @@
   .overlay-bar .ot { flex: 1 1 auto; font-weight: 600; font-size: 15px; }
   .overlay-close { flex: 0 0 auto; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.12); color: #fff; cursor: pointer; }
   .overlay-close svg { width: 20px; height: 20px; }
-  .overlay-scroll { flex: 1 1 auto; overflow: auto; -webkit-overflow-scrolling: touch; display: grid; place-items: center; border-radius: 14px; }
-  .overlay-scroll img { max-width: 100%; height: auto; border-radius: 10px; }
+  .overlay-scroll { flex: 1 1 auto; overflow: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 16px; }
+  .overlay-scroll .map { margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .overlay-scroll .map-cap { color: #d8dee9; font-size: 13px; font-weight: 600; padding: 0 2px; }
+  .overlay-scroll img { width: 100%; height: auto; border-radius: 10px; background: #fff; }
   .overlay-msg { color: #d8dee9; text-align: center; padding: 40px 20px; line-height: 1.6; }
+
+  /* ---- Dynamische Orientierungskarte (SVG) ---- */
+  .mapcard { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px; padding: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18); }
+  .mapcard svg { width: 100%; height: auto; display: block; background: transparent; border-radius: 0; }
+  .map-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 14px 2px 0; }
+  .map-chips .chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px;
+    border-radius: 11px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16);
+    color: #e8edf5; font-size: 13px; font-weight: 600; }
+  .map-chips .chip .dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 11px; }
+  .map-chips .lvlpill { color: #fff; background: var(--grad); border-color: transparent; }
+  .map-legend { margin: 14px 2px 2px; color: #c2cad6; font-size: 12.5px; line-height: 1.5; }
+  @keyframes tp-pulse { 0%{ r:13; opacity:.55 } 70%{ r:30; opacity:0 } 100%{ opacity:0 } }
+  .mapcard .pulse { animation: tp-pulse 2.4s ease-out infinite; transform-origin: center; }
+  @media (prefers-reduced-motion: reduce){ .mapcard .pulse{ animation: none; opacity: 0 } }
 </style>
 </head>
 <body data-page="trainingsplan">
@@ -231,16 +251,15 @@
    tage[]      : ein Eintrag pro Tag.
      datum     : ISO "YYYY-MM-DD" (stabil — wird als Schlüssel für Häkchen genutzt).
      dow       : Kürzel im Tag-Umschalter (Mo/Di/Mi/Do/Fr).
-     termine[] : zeit "HH:MM", name, raum, optional note, optional grundriss.
-                 grundriss = Schlüssel aus GRUNDRISSE (null/weglassen = "folgt").
-   GRUNDRISSE  : Raum-Plan-Register. Bild-Dateien liegen im selben Ordner.
+     termine[] : zeit "HH:MM", name, raum, optional note.
+   raum        : Trakt + Ebene + Bereich. Die Orientierungskarte wird daraus
+                 AUTOMATISCH gezeichnet — Format beibehalten:
+                 "Trakt <A–F>/E<n> · <Bereich> …"  z. B. "Trakt E/E0 · Sporthalle"
+                 oder "Kesselhaus · EG <Bereich>" (EG = Ebene 1).
+                 Trakt-Buchstabe steuert, welcher Bereich auf der Karte leuchtet;
+                 die Ebene wird aus "/E<n>" bzw. "EG" gelesen. Kein Bild nötig.
    Privatsphäre: KEINE Namen/Diagnosen/Zimmer/Pat.-Nr. — nur Zeit/Leistung/Raum.
    ===================================================================== */
-var GRUNDRISSE = {
-  // "kesselhaus": { titel: "Kesselhaus / EG", bild: "grundriss-1.png" },
-  // "trakt-e":    { titel: "Trakt E / E0",   bild: "grundriss-2.png" }
-};
-
 var PLAN = {
   meta: { woche: "22.–25. Juni 2026", stand: "2026-06-20", quelle: "Ausdruck 19.06.2026" },
   tage: [
@@ -361,12 +380,11 @@ var PLAN = {
       body.querySelector('.name').textContent = t.name;
       if (t.note){ var n = el('div', 'note'); n.textContent = t.note; body.appendChild(n); }
 
-      // Raum-Button
-      var g = t.grundriss && GRUNDRISSE[t.grundriss] ? GRUNDRISSE[t.grundriss] : null;
-      var room = el('button', 'room' + (g ? '' : ' nomap'));
+      // Raum-Button — öffnet die automatisch gezeichnete Orientierungskarte
+      var room = el('button', 'room');
       room.innerHTML = svgIcon(PIN) + '<span class="rt"></span>';
-      room.querySelector('.rt').textContent = t.raum + (g ? '' : ' · Grundriss folgt');
-      room.addEventListener('click', function(e){ e.stopPropagation(); openGrundriss(t, g); });
+      room.querySelector('.rt').textContent = t.raum;
+      room.addEventListener('click', function(e){ e.stopPropagation(); openGrundriss(t); });
       body.appendChild(room);
 
       card.appendChild(check); card.appendChild(body);
@@ -389,14 +407,99 @@ var PLAN = {
   overlay.addEventListener('click', function(e){ if (e.target === overlay) closeOverlay(); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeOverlay(); });
 
-  function openGrundriss(t, g){
+  /* ---- Orientierungskarte: Geometrie + Generator ----
+     Schematische Klinik-Karte im Dashboard-Stil. Der Trakt des Termins leuchtet,
+     der Rest dient nur der Orientierung. Geometrie 1:1 aus dem abgenommenen Mockup. */
+  var TRAKTE = [
+    { k:'A', x:0,   y:187, w:80,  h:26,  rx:8,  tf:'rotate(32 80 200)',   c:'var(--a)', lx:40,  ly:205, px:46,  py:160 },
+    { k:'B', x:76,  y:192, w:84,  h:30,  rx:8,  tf:'',                    c:'var(--b)', lx:118, ly:212, px:118, py:170 },
+    { k:'C', x:158, y:146, w:44,  h:104, rx:10, tf:'',                    c:'var(--c)', lx:180, ly:236, px:180, py:138 },
+    { k:'D', x:192, y:112, w:118, h:28,  rx:8,  tf:'rotate(-30 250 126)', c:'var(--d)', lx:250, ly:131, px:251, py:100 },
+    { k:'E', x:248, y:26,  w:100, h:92,  rx:12, tf:'',                    c:'var(--e)', lx:298, ly:80,  px:298, py:24  },
+    { k:'F', x:206, y:192, w:56,  h:30,  rx:8,  tf:'',                    c:'var(--f)', lx:234, ly:212, px:234, py:178 },
+    { k:'K', x:206, y:236, w:60,  h:32,  rx:8,  tf:'',                    c:'var(--k)', lx:236, ly:256, px:236, py:224 }
+  ];
+  var TCOLOR = {}; TRAKTE.forEach(function(tk){ TCOLOR[tk.k] = tk.c; });
+
+  function parseTrakt(raum){
+    if (/kesselhaus/i.test(raum)) return 'K';
+    var m = raum.match(/Trakt\s+([A-Fa-f])/);
+    return m ? m[1].toUpperCase() : null;
+  }
+  function parseEbene(raum){
+    if (/kesselhaus/i.test(raum) || /\bEG\b/.test(raum)) return 1;   // EG = Erdgeschoss = Ebene 1
+    var m = raum.match(/\/E(-?\d)/);            // "/E0", "/E1", "/E-1"
+    if (m) return parseInt(m[1], 10);
+    m = raum.match(/\/E\D*?(-?\d)/);            // "Trakt A/E · 2/200" → 2
+    return m ? parseInt(m[1], 10) : null;
+  }
+  function ebeneText(n){ return n === null ? '?' : (n < 0 ? '−' + Math.abs(n) : '' + n); }
+  function bereichOf(raum){
+    var parts = raum.split('·').map(function(s){ return s.trim(); }).filter(Boolean);
+    if (parts.length && /trakt|kesselhaus/i.test(parts[0])) parts.shift();
+    parts = parts.filter(function(p){ return !/^\d+$/.test(p) && !/^\d+\/\d+$/.test(p); });
+    return parts.join(' · ').replace(/^EG\s+/, '');
+  }
+
+  function mapSVG(target){
+    var GLOW = '<filter id="tpGlow" x="-50%" y="-50%" width="200%" height="200%">'
+      + '<feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+    var PAT = '<pattern id="tpBau" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
+      + '<rect width="9" height="9" fill="#f2b21a"/><rect width="4.5" height="9" fill="#1a1a1a"/></pattern>';
+    var CORR = 'stroke="rgba(255,255,255,0.16)" stroke-width="7" stroke-linecap="round" fill="none"';
+    var s = '<svg viewBox="0 0 360 285" role="img" aria-label="Orientierungskarte, Ziel Trakt ' + (target || '') + '">';
+    s += '<defs>' + GLOW + PAT + '</defs>';
+    // Verbindungs-Korridore
+    s += '<path d="M160 206 L150 206" ' + CORR + '/>'
+       + '<path d="M202 207 L206 207" ' + CORR + '/>'
+       + '<path d="M288 110 L300 96" ' + CORR + '/>';
+    // Trakt-Blöcke
+    var pins = '';
+    TRAKTE.forEach(function(tk){
+      var isT = (tk.k === target);
+      var rect = '<rect x="' + tk.x + '" y="' + tk.y + '" width="' + tk.w + '" height="' + tk.h
+        + '" rx="' + tk.rx + '" fill="' + tk.c + '" stroke="rgba(255,255,255,0.16)" stroke-width="1.2"'
+        + (isT ? ' filter="url(#tpGlow)"' : '') + '/>';
+      var inner = (tk.k === 'E') ? '<rect x="262" y="40" width="72" height="40" rx="6" fill="none" stroke="rgba(16,21,31,0.30)" stroke-width="1.3"/>' : '';
+      var letter = '<text x="' + tk.lx + '" y="' + tk.ly + '" text-anchor="middle" style="font:700 '
+        + (isT ? 16 : 12) + 'px -apple-system,sans-serif" fill="' + (isT ? '#10151f' : '#ffffff') + '">' + tk.k + '</text>';
+      s += '<g opacity="' + (isT ? '1' : '0.32') + '"' + (tk.tf ? ' transform="' + tk.tf + '"' : '') + '>'
+         + rect + inner + letter + '</g>';
+      if (isT){
+        pins += '<g transform="translate(' + tk.px + ' ' + tk.py + ')">'
+          + '<circle class="pulse" cx="0" cy="0" r="13" fill="' + tk.c + '"/>'
+          + '<path d="M0 -20 C 9 -20 14 -13 14 -6 C 14 3 0 14 0 14 C 0 14 -14 3 -14 -6 C -14 -13 -9 -20 0 -20 Z" fill="' + tk.c + '" stroke="#fff" stroke-width="2"/>'
+          + '<circle cx="0" cy="-6" r="4.5" fill="#fff"/></g>';
+      }
+    });
+    // Baustelle (oberer Teil von C, bis Oberkante B/F)
+    s += '<rect x="156" y="150" width="48" height="42" rx="5" fill="url(#tpBau)" opacity=".6"/>'
+       + '<g transform="translate(180 144)">'
+       + '<path d="M0 -12 L13 11 L-13 11 Z" fill="#f2b21a" stroke="#1a1a1a" stroke-width="2.2" stroke-linejoin="round"/>'
+       + '<rect x="-1.6" y="-5" width="3.2" height="9" rx="1.4" fill="#1a1a1a"/><circle cx="0" cy="7" r="1.8" fill="#1a1a1a"/></g>';
+    // Haupteingang (Basis von C)
+    s += '<g transform="translate(180 254)"><path d="M0 8 L-6 -3 L6 -3 Z" fill="var(--accent)"/>'
+       + '<text x="0" y="22" text-anchor="middle" style="font:700 8.5px -apple-system,sans-serif" fill="var(--accent)">Haupteingang</text></g>';
+    s += pins + '</svg>';
+    return s;
+  }
+
+  function openGrundriss(t){
+    var target = parseTrakt(t.raum);
+    var eb = parseEbene(t.raum);
+    var bereich = bereichOf(t.raum);
     overlayTitle.textContent = t.raum;
-    if (g && g.bild){
-      overlayBody.innerHTML = '<img alt="Grundriss ' + (g.titel || '') + '">';
-      overlayBody.querySelector('img').src = g.bild;
-    } else {
-      overlayBody.innerHTML = '<div class="overlay-msg">Für diesen Raum ist noch kein Grundriss hinterlegt.<br>Die Scans werden ergänzt, sobald sie vorliegen.</div>';
-    }
+    var html = '<div class="mapcard">' + mapSVG(target) + '</div>';
+    html += '<div class="map-chips">';
+    html += '<span class="chip lvlpill">Ebene ' + ebeneText(eb) + '</span>';
+    if (target) html += '<span class="chip"><span class="dot" style="background:' + (TCOLOR[target] || 'var(--accent)') + '"></span>Ziel: Trakt ' + target + '</span>';
+    html += '</div>';
+    html += '<div class="map-legend">Der Zielort ist hell hervorgehoben'
+      + (bereich ? ' (' + bereich + ')' : '') + '. Eingang über Trakt C, dann Ebene '
+      + ebeneText(eb) + '. Übrige Trakte nur zur Orientierung gedimmt. '
+      + 'Das Warndreieck markiert die aktuelle Baustelle.</div>';
+    overlayBody.innerHTML = html;
+    overlayBody.scrollTop = 0;
     overlay.classList.add('open');
   }
   function closeOverlay(){ overlay.classList.remove('open'); }

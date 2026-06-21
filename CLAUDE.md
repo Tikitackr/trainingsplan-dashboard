@@ -18,7 +18,8 @@ kein Internet/keine Abhängigkeiten) im Liquid-Glass-Stil.
 - Termine als Karten: Antippen = erledigt (durchgestrichen + gedimmt).
   Häkchen werden pro `Datum|Zeit|Name` in `localStorage` gespeichert → bleiben
   bei einem neuen Ausdruck erhalten, solange Datum/Zeit/Name gleich bleiben.
-- Raum-Button pro Termin → öffnet den zugehörigen Grundriss als Vollbild-Overlay.
+- Raum-Button pro Termin → öffnet eine **automatisch gezeichnete
+  Orientierungskarte** (SVG) als Vollbild-Overlay: der Ziel-Trakt leuchtet.
 - Hell/Dunkel-Umschalter, Fortschrittsanzeige pro Tag.
 
 ## WICHTIG: Privatsphäre (Repo ist öffentlich!)
@@ -43,23 +44,34 @@ Thomas liefert einen Scan/Foto des neuen Therapieplans. Dann:
    - **Schlüssel-Stabilität:** Häkchen hängen an `datum|zeit|name`. Ändert sich
      bei einem unveränderten Termin nichts an diesen drei Feldern, bleibt das
      Häkchen erhalten. Geänderte/neue Termine starten leer — so gewollt.
-3. **Grundriss-Zuordnung** (falls relevant, siehe unten): bei jedem Termin
-   optional `grundriss: "<schlüssel>"` setzen.
+3. **Orientierungskarte:** nichts extra zu tun — sie wird automatisch aus dem
+   `raum`-Feld gezeichnet (siehe unten). Wichtig nur: das `raum`-Format
+   einhalten, damit Trakt + Ebene erkannt werden.
 4. **Lokal prüfen:** `open index.html` und kurz durchklicken.
 5. **Committen + pushen** (erst nach Thomas' Freigabe — er ist Dirigent):
    `git add -A && git commit -m "Plan aktualisiert: <Zeitraum>" && git push`
    GitHub Pages baut automatisch neu (~1 Min). Thomas lädt die URL neu.
 
-## Grundrisse ergänzen (kommen als 2 Scans nach)
-1. Scans als Bilder im Projektordner ablegen, z. B. `grundriss-1.png`,
-   `grundriss-2.png` (komprimiert, < ~1 MB pro Bild).
-2. In `index.html` im Objekt `var GRUNDRISSE = { … }` Einträge anlegen:
-   `"kesselhaus": { titel: "Kesselhaus / EG", bild: "grundriss-1.png" }`.
-3. Bei den Terminen den passenden Schlüssel als `grundriss: "kesselhaus"`
-   eintragen. Räume ohne Zuordnung zeigen „Grundriss folgt".
-4. Committen + pushen.
+## Orientierungskarte (automatisch gezeichnet, SVG)
+Es gibt **keine Bild-Pläne mehr**. Der Raum-Button öffnet eine schematische
+Klinik-Karte im Dashboard-Stil, die per JavaScript gezeichnet wird (Funktion
+`mapSVG` in `index.html`). Der **Trakt des Termins leuchtet** in seiner
+Bereichsfarbe (Glow + Ziel-Pin), der Rest ist gedimmt; Baustelle und
+Haupteingang sind fest eingezeichnet. Darunter Ebenen-Pille + Ziel-Chip + Text.
 
-## Räume aus dem ersten Ausdruck (für die Grundriss-Zuordnung)
+**Wie die Karte gesteuert wird — nur das `raum`-Feld zählt:**
+- Trakt: `Trakt A`…`Trakt F` oder `Kesselhaus` (→ Block „K").
+- Ebene: aus `/E0`, `/E1`, `/E-1`; `EG` = Ebene 1; `Trakt A/E · 2/200` = Ebene 2.
+- Bereich (Text unter der Karte): alles nach dem Trakt-Code, reine Nummern
+  (`5300`, `2/200`) werden rausgefiltert.
+- Beispiele: `"Trakt E/E0 · Therapiebereich 3 · Sporthalle"` → E, Ebene 0;
+  `"Kesselhaus · EG Vortragssaal"` → K, Ebene 1.
+
+**Karten-Geometrie ändern** (nur wenn ein Trakt umziehen muss): im Array
+`var TRAKTE = [ … ]` die Koordinaten anpassen. Anordnung folgt der Vorlage
+(Lageplan/Wegweiser, archiviert in `Archiv/`). Spielwiese: `mockup-karte.html`.
+
+## Räume aus dem ersten Ausdruck (Trakt → Ebene → Bereich)
 - Trakt E/E0 · Therapiebereich 3 · Sporthalle
 - Trakt C/E0 · Therapiebereich 1
 - Trakt D/E0 · Therapiebereich 2 · Gymn.halle
