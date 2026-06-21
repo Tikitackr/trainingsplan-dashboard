@@ -250,7 +250,13 @@
 
 <script>
 /* =====================================================================
-   DATENBLOCK — beim neuen Ausdruck NUR diese Struktur anpassen.
+   DATENBLOCK (Offline-Fallback).
+   ---------------------------------------------------------------------
+   Die LIVE-Termine stehen in `plan.json` (wird beim Start frisch geladen,
+   Cache-sicher). Dieser eingebettete `PLAN_DEFAULT` ist nur der Fallback,
+   wenn `plan.json` (noch) nicht geladen werden kann — z. B. offline oder beim
+   lokalen Öffnen per file://. BEIM UPDATE beide synchron halten:
+   `plan.json` UND diesen Block auf denselben Stand bringen.
    ---------------------------------------------------------------------
    meta.woche  : Anzeigetext im Header.
    tage[]      : ein Eintrag pro Tag.
@@ -265,7 +271,7 @@
                  die Ebene wird aus "/E<n>" bzw. "EG" gelesen. Kein Bild nötig.
    Privatsphäre: KEINE Namen/Diagnosen/Zimmer/Pat.-Nr. — nur Zeit/Leistung/Raum.
    ===================================================================== */
-var PLAN = {
+var PLAN_DEFAULT = {
   meta: { woche: "22.–27. Juni 2026", stand: "2026-06-20", quelle: "Ausdruck 19.06.2026" },
   tage: [
     { datum: "2026-06-22", dow: "Mo", termine: [
@@ -333,8 +339,6 @@ var PLAN = {
   var listEl = document.getElementById('list');
   var footer = document.getElementById('footer');
 
-  weeklabel.textContent = PLAN.meta.woche || '';
-
   var DOW_LANG = { Mo:'Montag', Di:'Dienstag', Mi:'Mittwoch', Do:'Donnerstag', Fr:'Freitag', Sa:'Samstag', So:'Sonntag' };
   function tagnum(datum){ var p = datum.split('-'); return p.length === 3 ? String(parseInt(p[2],10)) : datum; }
 
@@ -343,22 +347,9 @@ var PLAN = {
   function dateToISO(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
   function addDays(iso, n){ var p = iso.split('-'); var d = new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10)); d.setDate(d.getDate()+n); return dateToISO(d); }
 
-  // Feste Wochenleiste Mo–Sa: Tage mit Terminen aus PLAN, leere Tage automatisch.
+  // Aktiver Plan + abgeleitete Wochenleiste (werden in applyPlan gesetzt).
   var WD = ['Mo','Di','Mi','Do','Fr','Sa'];
-  var byDow = {}; PLAN.tage.forEach(function(t){ byDow[t.dow] = t; });
-  var monday = null;
-  for (var i = 0; i < PLAN.tage.length; i++){
-    var off = WD.indexOf(PLAN.tage[i].dow);
-    if (off >= 0){ monday = addDays(PLAN.tage[i].datum, -off); break; }
-  }
-  var DAYS = WD.map(function(dow, idx){
-    return byDow[dow] || { datum: monday ? addDays(monday, idx) : ('leer-' + dow), dow: dow, termine: [] };
-  });
-
-  // Aktiven Tag bestimmen: heute, sonst Montag
-  var today = todayISO();
-  var active = 0;
-  for (var j = 0; j < DAYS.length; j++){ if (DAYS[j].datum === today){ active = j; break; } }
+  var PLAN = PLAN_DEFAULT, DAYS = [], active = 0, firstApply = true;
 
   function renderTabs(){
     daysEl.innerHTML = '';
@@ -533,10 +524,61 @@ var PLAN = {
   }
   function closeOverlay(){ overlay.classList.remove('open'); }
 
-  footer.innerHTML = 'Stand ' + (PLAN.meta.stand || '') + (PLAN.meta.quelle ? ' · ' + PLAN.meta.quelle : '') + ' · Häkchen werden auf diesem Gerät gespeichert.';
+  // ---- Plan anwenden + frisch laden (Cache-sicher, Offline-Fallback) ----
+  // Reihenfolge: sofort aus Cache/Default rendern, dann plan.json frisch holen
+  // (Cache-Bust + no-store) und bei Änderung neu rendern. Häkchen liegen separat
+  // im localStorage und bleiben dabei unangetastet.
+  var PLAN_STORE_KEY = 'tp-' + PAGE + '-plandata';
 
-  renderTabs();
-  renderDay();
+  function planValid(p){ return p && p.tage && p.tage.length >= 0 && p.meta; }
+  function planEqual(a, b){ try { return JSON.stringify(a) === JSON.stringify(b); } catch(e){ return false; } }
+
+  function applyPlan(plan){
+    if (!planValid(plan)) return;
+    PLAN = plan;
+    weeklabel.textContent = (PLAN.meta && PLAN.meta.woche) || '';
+    footer.innerHTML = 'Stand ' + ((PLAN.meta && PLAN.meta.stand) || '')
+      + (PLAN.meta && PLAN.meta.quelle ? ' · ' + PLAN.meta.quelle : '')
+      + ' · Häkchen werden auf diesem Gerät gespeichert.';
+    // Feste Wochenleiste Mo–Sa: Tage mit Terminen aus PLAN, leere Tage automatisch.
+    var byDow = {}; PLAN.tage.forEach(function(t){ byDow[t.dow] = t; });
+    var monday = null;
+    for (var i = 0; i < PLAN.tage.length; i++){
+      var off = WD.indexOf(PLAN.tage[i].dow);
+      if (off >= 0){ monday = addDays(PLAN.tage[i].datum, -off); break; }
+    }
+    DAYS = WD.map(function(dow, idx){
+      return byDow[dow] || { datum: monday ? addDays(monday, idx) : ('leer-' + dow), dow: dow, termine: [] };
+    });
+    if (firstApply){
+      var today = todayISO(); active = 0;
+      for (var j = 0; j < DAYS.length; j++){ if (DAYS[j].datum === today){ active = j; break; } }
+      firstApply = false;
+    } else if (active >= DAYS.length){ active = 0; }
+    renderTabs();
+    renderDay();
+  }
+
+  // 1) Sofort: zuletzt geladener Plan aus localStorage, sonst der eingebettete Default.
+  var startPlan = PLAN_DEFAULT;
+  try { var cached = store.get(PLAN_STORE_KEY); if (cached){ var cp = JSON.parse(cached); if (planValid(cp)) startPlan = cp; } } catch(e){}
+  applyPlan(startPlan);
+
+  // 2) Frisch: plan.json mit Cache-Bust + no-store. Klappt online (GitHub Pages);
+  //    offline oder über file:// schlägt es still fehl, dann bleibt der Start-Plan.
+  (function fetchFreshPlan(){
+    if (typeof fetch !== 'function') return;
+    try {
+      fetch('plan.json?t=' + (new Date().getTime()), { cache: 'no-store' })
+        .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
+        .then(function(fresh){
+          if (!planValid(fresh)) return;
+          store.set(PLAN_STORE_KEY, JSON.stringify(fresh));
+          if (!planEqual(fresh, PLAN)) applyPlan(fresh);
+        })
+        .catch(function(){ /* offline / file:// — Start-Plan bleibt */ });
+    } catch(e){}
+  })();
 })();
 </script>
 </body>

@@ -1,0 +1,31 @@
+{
+  "meta": { "woche": "22.–27. Juni 2026", "stand": "2026-06-20", "quelle": "Ausdruck 19.06.2026" },
+  "tage": [
+    { "datum": "2026-06-22", "dow": "Mo", "termine": [
+      { "zeit": "08:55", "name": "Übungsgruppe", "raum": "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { "zeit": "10:40", "name": "Hydrojetmassage", "raum": "Trakt C/E0 · Therapiebereich 1" },
+      { "zeit": "11:30", "name": "Gymnastik HWS/LWS", "raum": "Trakt D/E0 · Therapiebereich 2 · Gymn.halle", "note": "Handtuch und Trainingsjacke mitbringen." },
+      { "zeit": "14:15", "name": "Einführung Atem- + Muskelentspannung", "raum": "Kesselhaus · EG Vortragssaal" }
+    ]},
+    { "datum": "2026-06-23", "dow": "Di", "termine": [
+      { "zeit": "08:55", "name": "Übungsgruppe", "raum": "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { "zeit": "10:00", "name": "Seminar für Herzpatienten", "raum": "Trakt F/E1 · 5300 · Schulungsraum 6" },
+      { "zeit": "14:00", "name": "Wärmepackung", "raum": "Trakt C/E0 · Therapiebereich 1" },
+      { "zeit": "15:20", "name": "Vortrag: Bewegung/Sport bei Herzkrankheit", "raum": "Kesselhaus · EG Vortragssaal" }
+    ]},
+    { "datum": "2026-06-24", "dow": "Mi", "termine": [
+      { "zeit": "08:55", "name": "Übungsgruppe", "raum": "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { "zeit": "10:00", "name": "Seminar für Herzpatienten", "raum": "Trakt F/E1 · 5300 · Schulungsraum 6" },
+      { "zeit": "11:00", "name": "Feedbackgespräch", "raum": "Kesselhaus · EG Vortragssaal", "note": "Mit den Patientenfürsprecherinnen der Klinik." },
+      { "zeit": "13:00", "name": "Mittlere Wanderung (max. 60 Min.)", "raum": "Trakt E/E0 · Therapiebereich 3", "note": "Wetterfeste Kleidung mitbringen." },
+      { "zeit": "14:15", "name": "Info: Rehabilitation und Sozialrecht", "raum": "Kesselhaus · EG Vortragssaal" },
+      { "zeit": "15:30", "name": "Vortrag: Herzinfarkt + Durchblutungsstörung", "raum": "Kesselhaus · EG Vortragssaal" }
+    ]},
+    { "datum": "2026-06-25", "dow": "Do", "termine": [
+      { "zeit": "07:40", "name": "Wärmepackung", "raum": "Trakt C/E0 · Therapiebereich 1" },
+      { "zeit": "08:55", "name": "Übungsgruppe", "raum": "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { "zeit": "10:00", "name": "Seminar für Herzpatienten (Teil 3)", "raum": "Trakt F/E1 · 5300 · Schulungsraum 6" },
+      { "zeit": "11:40", "name": "Visite", "raum": "Trakt A/E · 2/200 · Station 2", "note": "Therapieheft mitbringen." }
+    ]}
+  ]
+}

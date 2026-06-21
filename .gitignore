@@ -5,3 +5,10 @@
 Eingang/
 Ablage/
 *.pdf
+
+# Termin-Scans: Eingang neuer Pläne + Archiv. Ordner + README bleiben im Repo,
+# die Scans (Privatdaten) NICHT.
+Update-Termine/*
+!Update-Termine/README.md
+Termine/*
+!Termine/README.md

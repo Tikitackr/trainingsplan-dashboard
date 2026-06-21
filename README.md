@@ -12,5 +12,6 @@ Eine self-contained `index.html` — kein Build, keine Abhängigkeiten.
 - Hell/Dunkel-Umschalter, Fortschritt pro Tag
 
 ## Aktualisieren
-Plan-Daten stehen im Block `var PLAN = { … }` in `index.html`.
-Ablauf siehe `CLAUDE.md`.
+Live-Termine stehen in `plan.json` (wird Cache-sicher frisch geladen);
+`index.html` hält eine Kopie als Offline-Fallback. Neuen Scan in
+`Update-Termine/` ablegen, Ablauf siehe `CLAUDE.md`.

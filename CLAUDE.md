@@ -30,30 +30,47 @@ Praktische „Mitbringen"-Hinweise (Handtuch, wetterfeste Kleidung, Therapieheft
 sind ok. Im Zweifel weglassen, niemals erfinden.
 
 ## So aktualisierst du bei einem NEUEN Ausdruck
-Thomas liefert einen Scan/Foto des neuen Therapieplans. Dann:
+Thomas legt einen neuen Scan in **`Update-Termine/`** ab (oder reicht ihn direkt).
+Dann:
 
-1. **Lesen:** Termine vom Scan ablesen (Zeit, Leistung, Raum, ggf. Hinweis).
-   Privatdaten (siehe oben) ignorieren.
-2. **Datenblock anpassen:** In `index.html` NUR den Block `var PLAN = { … }`
-   (klar markiert zwischen „DATENBLOCK" und „ENDE DATENBLOCK") bearbeiten.
-   CSS/JS nicht anfassen.
-   - `meta.woche` auf den neuen Anzeige-Zeitraum setzen.
-   - `meta.stand` = heutiges Datum, `meta.quelle` = Ausdruck-Datum.
+1. **Lesen:** Termine vom Scan in `Update-Termine/` ablesen (Zeit, Leistung,
+   Raum, ggf. Hinweis). Privatdaten (siehe oben) ignorieren.
+2. **Daten anpassen — `plan.json` ist die Quelle.** Termine in `plan.json`
+   eintragen. Dann denselben Stand in den Fallback-Block `var PLAN_DEFAULT = {…}`
+   in `index.html` spiegeln (klar markiert „DATENBLOCK"/„ENDE DATENBLOCK").
+   **Beide synchron halten.** CSS/JS sonst nicht anfassen.
+   - `meta.woche` = neuer Anzeige-Zeitraum; `meta.stand` = heute;
+     `meta.quelle` = Ausdruck-Datum.
    - Pro Tag ein Eintrag in `tage[]`: `datum` (ISO "YYYY-MM-DD"), `dow`
      (Mo/Di/…), `termine[]` mit `zeit` ("HH:MM"), `name`, `raum`, optional `note`.
-   - **Tab-Leiste ist fest Mo–Sa.** Nur Tage MIT Terminen in `tage[]` eintragen;
-     leere Tage (z. B. Fr/Sa) erscheinen automatisch mit „Keine Termine" — nicht
-     extra anlegen. Die Datumszahlen der leeren Tage werden aus dem Montag berechnet.
-   - **Schlüssel-Stabilität:** Häkchen hängen an `datum|zeit|name`. Ändert sich
-     bei einem unveränderten Termin nichts an diesen drei Feldern, bleibt das
-     Häkchen erhalten. Geänderte/neue Termine starten leer — so gewollt.
-3. **Orientierungskarte:** nichts extra zu tun — sie wird automatisch aus dem
-   `raum`-Feld gezeichnet (siehe unten). Wichtig nur: das `raum`-Format
-   einhalten, damit Trakt + Ebene erkannt werden.
-4. **Lokal prüfen:** `open index.html` und kurz durchklicken.
-5. **Committen + pushen** (erst nach Thomas' Freigabe — er ist Dirigent):
+   - **Tab-Leiste ist fest Mo–Sa.** Nur Tage MIT Terminen eintragen; leere Tage
+     (z. B. Fr/Sa) erscheinen automatisch mit „Keine Termine". Datumszahlen der
+     leeren Tage werden aus dem Montag berechnet.
+   - **Schlüssel-Stabilität:** Häkchen hängen an `datum|zeit|name`. Bleiben diese
+     drei Felder gleich, bleibt das Häkchen erhalten. Neue/geänderte Termine
+     starten leer — so gewollt.
+3. **Orientierungskarte:** nichts extra — wird automatisch aus dem `raum`-Feld
+   gezeichnet (siehe unten). Nur das `raum`-Format einhalten.
+4. **Lokal prüfen:** `open index.html` zeigt den Fallback (file:// lädt kein
+   `plan.json`). Für den echten Frisch-Lade-Pfad kurz einen Server starten:
+   `python3 -m http.server 8765` → http://localhost:8765/ .
+5. **Scan archivieren:** abgearbeiteten Scan von `Update-Termine/` nach
+   `Termine/<datum>_Ausdruck/` verschieben.
+6. **Committen + pushen** (erst nach Thomas' Freigabe — er ist Dirigent):
    `git add -A && git commit -m "Plan aktualisiert: <Zeitraum>" && git push`
-   GitHub Pages baut automatisch neu (~1 Min). Thomas lädt die URL neu.
+   GitHub Pages baut automatisch neu (~1 Min). Das iPhone zieht `plan.json`
+   beim nächsten Öffnen frisch (Cache-Bust), neue Termine erscheinen automatisch.
+
+## Daten-Laden & Cache (warum Updates ohne Cache-Löschen ankommen)
+- **`plan.json`** = Live-Termine. Die App lädt sie beim Start frisch mit
+  `plan.json?t=<zeit>` und `cache:'no-store'` → umgeht den Browser-Cache gezielt.
+- **`PLAN_DEFAULT`** in `index.html` = Offline-/file://-Fallback. Wird vom frisch
+  geladenen `plan.json` überschrieben, sobald online.
+- **Offline:** der zuletzt geladene Plan liegt im localStorage und wird sofort
+  angezeigt; ist kein Netz da, bleibt dieser Stand.
+- **Häkchen liegen im localStorage**, getrennt vom Cache. „Cache leeren" löscht
+  sie NICHT — nur „Verlauf und Websitedaten löschen" (iOS Safari komplett) würde
+  sie löschen. Darum nie zum Aktualisieren die Websitedaten löschen.
 
 ## Orientierungskarte (automatisch gezeichnet, SVG)
 Es gibt **keine Bild-Pläne mehr**. Der Raum-Button öffnet eine schematische
@@ -84,5 +101,6 @@ Haupteingang sind fest eingezeichnet. Darunter Ebenen-Pille + Ziel-Chip + Text.
 
 ## Konventionen
 - Oberflächensprache Deutsch.
-- Keine externen Abhängigkeiten, alles inline (muss offline auf dem iPhone gehen).
+- Keine externen Abhängigkeiten/CDNs. CSS+JS inline in `index.html`; einzige
+  lokale Datei daneben ist `plan.json` (eigene Domain, Offline-Fallback eingebaut).
 - Kritische Aktionen (push) nur mit Thomas' Freigabe.
