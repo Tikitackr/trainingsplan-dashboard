@@ -41,6 +41,9 @@ Thomas liefert einen Scan/Foto des neuen Therapieplans. Dann:
    - `meta.stand` = heutiges Datum, `meta.quelle` = Ausdruck-Datum.
    - Pro Tag ein Eintrag in `tage[]`: `datum` (ISO "YYYY-MM-DD"), `dow`
      (Mo/Di/…), `termine[]` mit `zeit` ("HH:MM"), `name`, `raum`, optional `note`.
+   - **Tab-Leiste ist fest Mo–Sa.** Nur Tage MIT Terminen in `tage[]` eintragen;
+     leere Tage (z. B. Fr/Sa) erscheinen automatisch mit „Keine Termine" — nicht
+     extra anlegen. Die Datumszahlen der leeren Tage werden aus dem Montag berechnet.
    - **Schlüssel-Stabilität:** Häkchen hängen an `datum|zeit|name`. Ändert sich
      bei einem unveränderten Termin nichts an diesen drei Feldern, bleibt das
      Häkchen erhalten. Geänderte/neue Termine starten leer — so gewollt.

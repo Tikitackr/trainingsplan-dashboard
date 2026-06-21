@@ -261,7 +261,7 @@
    Privatsphäre: KEINE Namen/Diagnosen/Zimmer/Pat.-Nr. — nur Zeit/Leistung/Raum.
    ===================================================================== */
 var PLAN = {
-  meta: { woche: "22.–25. Juni 2026", stand: "2026-06-20", quelle: "Ausdruck 19.06.2026" },
+  meta: { woche: "22.–27. Juni 2026", stand: "2026-06-20", quelle: "Ausdruck 19.06.2026" },
   tage: [
     { datum: "2026-06-22", dow: "Mo", termine: [
       { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
@@ -333,15 +333,31 @@ var PLAN = {
   var DOW_LANG = { Mo:'Montag', Di:'Dienstag', Mi:'Mittwoch', Do:'Donnerstag', Fr:'Freitag', Sa:'Samstag', So:'Sonntag' };
   function tagnum(datum){ var p = datum.split('-'); return p.length === 3 ? String(parseInt(p[2],10)) : datum; }
 
-  // Aktiven Tag bestimmen: heute, sonst erster Tag
+  // Datum-Helfer
   function todayISO(){ try { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch(e){ return null; } }
+  function dateToISO(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function addDays(iso, n){ var p = iso.split('-'); var d = new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10)); d.setDate(d.getDate()+n); return dateToISO(d); }
+
+  // Feste Wochenleiste Mo–Sa: Tage mit Terminen aus PLAN, leere Tage automatisch.
+  var WD = ['Mo','Di','Mi','Do','Fr','Sa'];
+  var byDow = {}; PLAN.tage.forEach(function(t){ byDow[t.dow] = t; });
+  var monday = null;
+  for (var i = 0; i < PLAN.tage.length; i++){
+    var off = WD.indexOf(PLAN.tage[i].dow);
+    if (off >= 0){ monday = addDays(PLAN.tage[i].datum, -off); break; }
+  }
+  var DAYS = WD.map(function(dow, idx){
+    return byDow[dow] || { datum: monday ? addDays(monday, idx) : ('leer-' + dow), dow: dow, termine: [] };
+  });
+
+  // Aktiven Tag bestimmen: heute, sonst Montag
   var today = todayISO();
   var active = 0;
-  for (var i = 0; i < PLAN.tage.length; i++){ if (PLAN.tage[i].datum === today){ active = i; break; } }
+  for (var j = 0; j < DAYS.length; j++){ if (DAYS[j].datum === today){ active = j; break; } }
 
   function renderTabs(){
     daysEl.innerHTML = '';
-    PLAN.tage.forEach(function(tag, idx){
+    DAYS.forEach(function(tag, idx){
       var b = el('button', 'day-tab' + (idx === active ? ' active' : '') + (dayDone(tag) ? ' alldone' : ''));
       b.setAttribute('role', 'tab');
       b.innerHTML = '<div class="dow">' + tag.dow + '</div><div class="dnum">' + tagnum(tag.datum) + '</div>';
@@ -351,7 +367,7 @@ var PLAN = {
   }
 
   function updateProgress(){
-    var tag = PLAN.tage[active]; if (!tag) return;
+    var tag = DAYS[active]; if (!tag) return;
     var total = tag.termine.length;
     var done = tag.termine.filter(function(t){ return store.get(key(tag.datum, t.zeit, t.name)) === '1'; }).length;
     dayProg.textContent = total ? (done + ' / ' + total + ' erledigt') : '';
@@ -361,7 +377,7 @@ var PLAN = {
   }
 
   function renderDay(){
-    var tag = PLAN.tage[active];
+    var tag = DAYS[active];
     listEl.innerHTML = '';
     if (!tag){ return; }
     dayTitle.textContent = DOW_LANG[tag.dow] || tag.dow;
