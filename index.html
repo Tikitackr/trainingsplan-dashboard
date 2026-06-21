@@ -452,7 +452,10 @@ var PLAN = {
     // Verbindungs-Korridore
     s += '<path d="M160 206 L150 206" ' + CORR + '/>'
        + '<path d="M202 207 L206 207" ' + CORR + '/>'
-       + '<path d="M288 110 L300 96" ' + CORR + '/>';
+       + '<path d="M288 110 L300 96" ' + CORR + '/>'
+       // Kleiner Gang F -> D (parallel zu C, führt um die nicht begehbare Baustelle)
+       + '<path d="M226 190 L226 172 L214 166" ' + CORR + '/>'
+       + '<text x="240" y="182" style="font:600 7.5px -apple-system,sans-serif" fill="rgba(255,255,255,0.6)">Gang</text>';
     // Trakt-Blöcke
     var pins = '';
     TRAKTE.forEach(function(tk){
@@ -494,10 +497,15 @@ var PLAN = {
     html += '<span class="chip lvlpill">Ebene ' + ebeneText(eb) + '</span>';
     if (target) html += '<span class="chip"><span class="dot" style="background:' + (TCOLOR[target] || 'var(--accent)') + '"></span>Ziel: Trakt ' + target + '</span>';
     html += '</div>';
+    var detour = (target === 'D' || target === 'E')
+      ? ' <b>Achtung Baustelle – nicht begehbar:</b> Zu Trakt D/E auf Ebene 0 Richtung F'
+        + ' (Speisesaal), dann durch den kleinen Gang neben F (parallel zur Baustelle) '
+        + (target === 'E' ? 'über D weiter nach E' : 'nach D') + '.'
+      : ' Das Warndreieck markiert die aktuelle Baustelle (nicht begehbar).';
     html += '<div class="map-legend">Der Zielort ist hell hervorgehoben'
       + (bereich ? ' (' + bereich + ')' : '') + '. Eingang über Trakt C, dann Ebene '
-      + ebeneText(eb) + '. Übrige Trakte nur zur Orientierung gedimmt. '
-      + 'Das Warndreieck markiert die aktuelle Baustelle.</div>';
+      + ebeneText(eb) + '. Übrige Trakte nur zur Orientierung gedimmt.'
+      + detour + '</div>';
     overlayBody.innerHTML = html;
     overlayBody.scrollTop = 0;
     overlay.classList.add('open');
