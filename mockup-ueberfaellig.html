@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--
+  MOCKUP: „überfällig"-Behandlung (Spielwiese, nicht im Dashboard verlinkt)
+  Zeigt alle Termin-Zustände nebeneinander. Szenario: heute, jetzt 11:15 Uhr.
+  Vorschlag: überfälliger offener Termin = bernsteinfarbenes Pill in der Liste
+  + hohler bernsteinfarbener Punkt im Zeitstrahl (voll deckend, anders als der
+  gedimmte „erledigt"-Ring).
+-->
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mockup · überfällig</title>
+<style>
+  :root {
+    --accent: #0a84ff; --accent-2: #5e5ce6; --grad: linear-gradient(135deg, #0a84ff, #5e5ce6);
+    --bg-0: #0a0e17; --bg-1: #0f1626; --text: #e6edf3; --muted: #9aa4b2;
+    --glass: rgba(255,255,255,0.07); --glass-strong: rgba(255,255,255,0.10);
+    --glass-border: rgba(255,255,255,0.12); --glass-edge: rgba(255,255,255,0.28);
+    --panel: rgba(18,24,38,0.72); --card: rgba(16,22,36,0.66);
+    --shadow: 0 8px 32px rgba(0,0,0,0.45); --radius: 18px;
+    --ok: #3fb950; --warn: #d29922; --meal: #e9a23b;
+    --a: #f2cf3e; --b: #ef8b3f; --c: #e0533f; --d: #5b8fd4; --e: #2fb8a6; --f: #d65f96; --k: #b06fd0;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text); background: var(--bg-1); line-height: 1.55; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(60vw 60vw at 12% 8%, rgba(10,132,255,0.32), transparent 60%),
+      radial-gradient(50vw 50vw at 88% 22%, rgba(94,92,230,0.26), transparent 60%),
+      radial-gradient(55vw 55vw at 70% 90%, rgba(64,156,255,0.18), transparent 60%),
+      linear-gradient(160deg, var(--bg-0), var(--bg-1)); }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 22px 14px 60px; }
+  .mtitle { font-size: 13px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin: 26px 2px 10px; }
+  .mtitle:first-child { margin-top: 0; }
+
+  /* ---- Heute-Karte ---- */
+  .today { background: linear-gradient(135deg, rgba(10,132,255,.16), rgba(94,92,230,.13));
+    border: 1px solid var(--glass-border); border-radius: var(--radius);
+    box-shadow: var(--shadow), inset 0 1px 0 var(--glass-edge); padding: 14px 15px 12px; margin: 0 0 14px; }
+  .today .thead { display: flex; align-items: flex-start; gap: 13px; }
+  .today .clock { font-size: 27px; font-weight: 800; letter-spacing: -.02em; line-height: 1; white-space: nowrap; }
+  .today .clock small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 3px; }
+  .today .lines { flex: 1; min-width: 0; font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; }
+  .today .lines .nx { color: var(--muted); font-size: 12.5px; }
+  .today .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 7px; vertical-align: middle; }
+  .today .pill.live { background: var(--ok); color: #04210d; }
+  .today .pill.meal { background: var(--meal); color: #241402; }
+  .today .pill.due  { background: var(--warn); color: #241402; }
+
+  /* ---- Zeitstrahl ---- */
+  .ribbon { position: relative; height: 26px; border-radius: 8px; background: var(--glass);
+    border: 1px solid var(--glass-border); margin: 13px 0 0; }
+  .ribbon .mseg { position: absolute; top: 0; bottom: 0; background: rgba(233,162,59,.30);
+    border-left: 1px solid rgba(233,162,59,.55); border-right: 1px solid rgba(233,162,59,.55); }
+  .ribbon .rdot { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
+    transform: translate(-50%,-50%); border: 2px solid var(--bg-1); }
+  .ribbon .rdot.done { background: transparent; opacity: 0.4; }
+  .ribbon .rdot.overdue { background: transparent; border-color: var(--warn);
+    box-shadow: 0 0 0 1px var(--warn), 0 0 7px rgba(210,153,34,.7); }
+  .ribbon .rnow { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text); }
+  .rticks { position: relative; height: 13px; margin-top: 3px; color: var(--muted); font-size: 10px; }
+  .rticks span { position: absolute; transform: translateX(-50%); }
+  .rlegend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 11px; font-size: 11px; color: var(--muted); }
+  .rlegend i { font-style: normal; display: inline-flex; align-items: center; gap: 5px; }
+  .lg { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--bg-1); display: inline-block; }
+  .lg.full { background: var(--e); }
+  .lg.done { background: transparent; border-color: var(--text); opacity: .4; }
+  .lg.due  { background: transparent; border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
+  .lg.now  { width: 2px; height: 13px; border-radius: 0; background: var(--text); border: 0; }
+
+  /* ---- Termin-Karten ---- */
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .appt { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; background: var(--card);
+    border: 1px solid var(--glass-border); border-radius: 16px;
+    box-shadow: var(--shadow), inset 0 1px 0 var(--glass-edge); overflow: hidden; }
+  .appt .check { flex: 0 0 26px; width: 26px; height: 26px; margin-top: 2px;
+    border: 2px solid var(--glass-border); border-radius: 9px; display: grid; place-items: center; }
+  .appt .check svg { width: 15px; height: 15px; color: #fff; opacity: 0; }
+  .appt .body { flex: 1 1 auto; min-width: 0; }
+  .appt .time { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .appt .name { font-size: 15px; margin-top: 1px; }
+  .appt .note { font-size: 13px; color: var(--muted); margin-top: 5px; }
+  .room { display: inline-flex; align-items: center; gap: 6px; margin-top: 9px; padding: 6px 11px;
+    border-radius: 10px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; color: var(--text); }
+  .room svg { width: 14px; height: 14px; }
+
+  /* erledigt */
+  .appt.done { opacity: 0.55; padding-top: 9px; padding-bottom: 9px; align-items: center; }
+  .appt.done .check { background: var(--grad); border-color: transparent; margin-top: 0; }
+  .appt.done .check svg { opacity: 1; }
+  .appt.done .time, .appt.done .name { display: inline; text-decoration: line-through; }
+  .appt.done .time { font-size: 15px; margin-right: 7px; }
+  .appt.done .name { font-size: 14px; }
+  .appt.done .room, .appt.done .note { display: none; }
+
+  /* läuft jetzt */
+  .appt.now { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok), 0 8px 24px rgba(0,0,0,.18), inset 0 1px 0 var(--glass-edge); }
+  .appt.now .time { color: var(--ok); }
+  .appt.now .name::after { content: "jetzt"; display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700;
+    color: #04210d; background: var(--ok); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+
+  /* als Nächstes */
+  .appt.next { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(0,0,0,.18), inset 0 1px 0 var(--glass-edge); }
+  .appt.next .time { color: var(--accent); }
+  .appt.next .name::after { content: "als Nächstes"; display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700;
+    color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 7px; vertical-align: middle; }
+
+  /* NEU: überfällig / noch offen */
+  .appt.overdue { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn), 0 8px 24px rgba(0,0,0,.18), inset 0 1px 0 var(--glass-edge); }
+  .appt.overdue .check { border-color: var(--warn); }
+  .appt.overdue .time { color: var(--warn); }
+  .appt.overdue .name::after { content: "überfällig"; display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700;
+    color: #241402; background: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="mtitle">Heute-Karte (jetzt 11:15)</div>
+    <div class="today">
+      <div class="thead">
+        <div class="clock">11:15<small>heute</small></div>
+        <div class="lines">
+          <div><span class="pill live">jetzt</span> Feedbackgespräch</div>
+          <div><span class="pill due">1 überfällig</span> 10:00 Seminar für Herzpatienten</div>
+          <div class="nx">Als Nächstes: 13:00 Mittlere Wanderung · in 1 h 45</div>
+        </div>
+      </div>
+      <div class="ribbon">
+        <div class="mseg" style="left:37.5%;width:10.4%"></div>
+        <div class="rdot done"    style="left:15.97%;background:var(--e)"></div>
+        <div class="rdot overdue" style="left:25%"></div>
+        <div class="rdot"         style="left:33.3%;background:var(--k)"></div>
+        <div class="rdot"         style="left:50%;background:var(--e)"></div>
+        <div class="rdot"         style="left:60.4%;background:var(--k)"></div>
+        <div class="rnow"         style="left:35.4%"></div>
+      </div>
+      <div class="rticks">
+        <span style="left:8.3%">8</span><span style="left:25%">10</span><span style="left:41.7%">12</span>
+        <span style="left:58.3%">14</span><span style="left:75%">16</span><span style="left:91.7%">18</span>
+      </div>
+      <div class="rlegend">
+        <i><span class="lg full"></span>offen / geplant</i>
+        <i><span class="lg due"></span>überfällig</i>
+        <i><span class="lg done"></span>erledigt</i>
+        <i><span class="lg now"></span>jetzt</i>
+      </div>
+    </div>
+
+    <div class="mtitle">Terminliste — alle Zustände</div>
+    <div class="list">
+
+      <div class="appt done">
+        <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
+        <div class="body"><div class="time">08:55</div><div class="name">Übungsgruppe</div></div>
+      </div>
+
+      <div class="appt overdue">
+        <div class="check"></div>
+        <div class="body">
+          <div class="time">10:00</div><div class="name">Seminar für Herzpatienten</div>
+          <button class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Trakt F/E1 · Schulungsraum 6</button>
+        </div>
+      </div>
+
+      <div class="appt now">
+        <div class="check"></div>
+        <div class="body">
+          <div class="time">11:00</div><div class="name">Feedbackgespräch</div>
+          <button class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Kesselhaus · EG Vortragssaal</button>
+        </div>
+      </div>
+
+      <div class="appt next">
+        <div class="check"></div>
+        <div class="body">
+          <div class="time">13:00</div><div class="name">Mittlere Wanderung (max. 60 Min.)</div>
+          <div class="note">Wetterfeste Kleidung mitbringen.</div>
+          <button class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Trakt E/E0 · Therapiebereich 3</button>
+        </div>
+      </div>
+
+      <div class="appt">
+        <div class="check"></div>
+        <div class="body">
+          <div class="time">14:15</div><div class="name">Info: Rehabilitation und Sozialrecht</div>
+          <button class="room"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.5-7-11a7 7 0 1114 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Kesselhaus · EG Vortragssaal</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

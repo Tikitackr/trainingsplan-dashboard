@@ -146,8 +146,10 @@
   .today .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 7px; vertical-align: middle; }
   .today .pill.live { background: var(--ok); color: #04210d; }
   .today .pill.meal { background: var(--meal); color: #241402; }
+  .today .pill.due { background: var(--warn); color: #241402; }
   [data-theme="light"] .today .pill.live { color: #fff; }
   [data-theme="light"] .today .pill.meal { color: #fff; }
+  [data-theme="light"] .today .pill.due { color: #fff; }
   .today .rcap { font-size: 13px; font-weight: 700; margin: 0 0 2px; }
   .today .ribbon { position: relative; height: 26px; border-radius: 8px; background: var(--glass);
     border: 1px solid var(--glass-border); margin: 13px 0 0; }
@@ -156,6 +158,7 @@
   .today .ribbon .rdot { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
     transform: translate(-50%,-50%); border: 2px solid var(--bg-1); }
   .today .ribbon .rdot.done { background: transparent; opacity: 0.4; }
+  .today .ribbon .rdot.overdue { background: transparent; border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn), 0 0 7px rgba(210,153,34,.7); }
   .today .ribbon .rnow { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text); }
   .today .rticks { position: relative; height: 13px; margin-top: 3px; color: var(--muted); font-size: 10px; }
   .today .rticks span { position: absolute; transform: translateX(-50%); }
@@ -211,6 +214,21 @@
   .appt.next .name::after { content: "als Nächstes"; display: inline-block; margin-left: 8px;
     font-size: 11px; font-weight: 700; color: var(--accent); border: 1px solid var(--accent);
     border-radius: 999px; padding: 1px 7px; vertical-align: middle; }
+
+  /* läuft gerade (offener Termin im aktuellen Zeitfenster) */
+  .appt.now { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok), 0 8px 24px rgba(0,0,0,.18), inset 0 1px 0 var(--glass-edge); }
+  .appt.now .time { color: var(--ok); }
+  .appt.now .name::after { content: "jetzt"; display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700;
+    color: #04210d; background: var(--ok); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+  [data-theme="light"] .appt.now .name::after { color: #fff; }
+
+  /* überfällig (offener Termin, Zeit vorbei und nicht mehr laufend) */
+  .appt.overdue { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn), 0 8px 24px rgba(0,0,0,.18), inset 0 1px 0 var(--glass-edge); }
+  .appt.overdue .check { border-color: var(--warn); }
+  .appt.overdue .time { color: var(--warn); }
+  .appt.overdue .name::after { content: "überfällig"; display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700;
+    color: #241402; background: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+  [data-theme="light"] .appt.overdue .name::after { color: #fff; }
 
   .empty { text-align: center; color: var(--muted); padding: 48px 16px; font-style: italic; }
 
@@ -467,6 +485,11 @@ var PLAN_DEFAULT = {
         var slotEnd = (curIdx + 1 < tag.termine.length) ? toMin(tag.termine[curIdx + 1].zeit) : toMin(cur.zeit) + 90;
         if (now < slotEnd && store.get(key(tag.datum, cur.zeit, cur.name)) !== '1') running = cur;
       }
+      var overdue = [];                                                // offen, Zeit vorbei, nicht (mehr) laufend
+      for (var oi = 0; oi < tag.termine.length; oi++){
+        var ot = tag.termine[oi];
+        if (toMin(ot.zeit) <= now && ot !== running && store.get(key(tag.datum, ot.zeit, ot.name)) !== '1') overdue.push(ot);
+      }
       function nxLine(t){ var d = toMin(t.zeit) - now; return t.zeit + ' ' + escHtml(t.name) + ' · in ' + Math.floor(d/60) + ' h ' + (d%60); }
       var meal = mealAt(now, set);
       h += '<div class="thead"><div class="clock">' + fmtMin(now) + '<small>heute</small></div><div class="lines">';
@@ -475,6 +498,7 @@ var PLAN_DEFAULT = {
       else if (tag.termine.length && !anyOpen) h += '<div>Alle Termine erledigt ✓</div>';
       else if (tag.termine.length) h += '<div>Keine weiteren Termine heute</div>';
       else h += '<div>Keine Termine heute</div>';
+      if (overdue.length) h += '<div><span class="pill due">' + overdue.length + ' überfällig</span> ' + overdue[0].zeit + ' ' + escHtml(overdue[0].name) + '</div>';
       if (meal) h += '<div><span class="pill meal">' + escHtml(meal.name) + ' bis ' + meal.bis + ' Uhr</span></div>';
       if (running && next) h += '<div class="nx">Als Nächstes: ' + nxLine(next) + '</div>';
       h += '</div></div>';
@@ -488,6 +512,7 @@ var PLAN_DEFAULT = {
       var tr = parseTrakt(t.raum); var col = tr ? ('var(--' + tr.toLowerCase() + ')') : 'var(--accent)';
       var done = store.get(key(tag.datum, t.zeit, t.name)) === '1';
       if (done) h += '<div class="rdot done" style="left:' + px(toMin(t.zeit)) + '%;border-color:' + col + '"></div>';
+      else if (isToday && t !== running && toMin(t.zeit) <= now) h += '<div class="rdot overdue" style="left:' + px(toMin(t.zeit)) + '%"></div>';
       else h += '<div class="rdot" style="left:' + px(toMin(t.zeit)) + '%;background:' + col + '"></div>';
     });
     if (isToday){ var nm = nowMin(); if (nm >= START && nm <= END) h += '<div class="rnow" style="left:' + px(nm) + '%"></div>'; }
@@ -495,6 +520,7 @@ var PLAN_DEFAULT = {
     [8,10,12,14,16,18].forEach(function(H){ h += '<span style="left:' + px(H*60) + '%">' + H + '</span>'; });
     h += '</div><div class="rlegend"><i><span class="sw" style="background:rgba(233,162,59,.5)"></span>Essenszeit</i>'
        + '<i><span class="sw" style="background:var(--accent)"></span>Termin</i>'
+       + (isToday ? '<i><span class="sw" style="background:transparent;border:1px solid var(--warn);box-shadow:0 0 0 1px var(--warn)"></span>überfällig</i>' : '')
        + (isToday ? '<i><span class="sw" style="background:var(--text)"></span>jetzt</i>' : '') + '</div>';
     todayEl.innerHTML = h;
   }
@@ -535,15 +561,15 @@ var PLAN_DEFAULT = {
         card.classList.toggle('done', now);
         updateProgress();
         renderTodayCard();
-        updateNextHighlight();
+        updateTodayStates();
       });
       listEl.appendChild(card);
     });
     updateProgress();
-    updateNextHighlight();
+    updateTodayStates();
   }
 
-  // Punkt 4: nächster offener Termin am heutigen Tag = „als Nächstes dran".
+  // nächster offener Termin am heutigen Tag = „als Nächstes dran".
   function nextKeyToday(){
     var tag = DAYS[active];
     if (!tag || tag.datum !== todayISO()) return null;
@@ -554,11 +580,33 @@ var PLAN_DEFAULT = {
     }
     return null;
   }
-  function updateNextHighlight(){
-    var nk = nextKeyToday();
+  // gerade laufender offener Termin (Slot-Modell, identisch zur Heute-Karte).
+  function runningKeyToday(){
+    var tag = DAYS[active];
+    if (!tag || tag.datum !== todayISO()) return null;
+    var now = nowMin(), curIdx = -1;
+    for (var i = 0; i < tag.termine.length; i++){ if (toMin(tag.termine[i].zeit) <= now) curIdx = i; }
+    if (curIdx < 0) return null;
+    var cur = tag.termine[curIdx];
+    var slotEnd = (curIdx + 1 < tag.termine.length) ? toMin(tag.termine[curIdx + 1].zeit) : toMin(cur.zeit) + 90;
+    if (now < slotEnd && store.get(key(tag.datum, cur.zeit, cur.name)) !== '1') return key(tag.datum, cur.zeit, cur.name);
+    return null;
+  }
+  // Listen-Zustände am Heute-Tag: jetzt / überfällig / als Nächstes.
+  function updateTodayStates(){
+    var tag = DAYS[active];
+    var isToday = tag && tag.datum === todayISO();
+    var now = isToday ? nowMin() : 0;
+    var rk = isToday ? runningKeyToday() : null;
+    var nk = isToday ? nextKeyToday() : null;
     var cards = listEl.querySelectorAll('.appt');
     for (var i = 0; i < cards.length; i++){
-      cards[i].classList.toggle('next', !!nk && cards[i].getAttribute('data-k') === nk);
+      var c = cards[i]; c.classList.remove('now', 'overdue', 'next');
+      if (!isToday || c.classList.contains('done')) continue;
+      var k = c.getAttribute('data-k'), t = tag.termine[i];
+      if (k === rk) c.classList.add('now');
+      else if (k === nk) c.classList.add('next');
+      else if (t && toMin(t.zeit) <= now) c.classList.add('overdue');
     }
   }
 
@@ -737,7 +785,7 @@ var PLAN_DEFAULT = {
   //    minütlich auffrischen (Uhr, „jetzt"-Linie, Jetzt/Nächstes).
   setInterval(function(){
     var tag = DAYS[active];
-    if (tag && tag.datum === todayISO()){ renderTodayCard(); updateNextHighlight(); }
+    if (tag && tag.datum === todayISO()){ renderTodayCard(); updateTodayStates(); }
   }, 30000);
 })();
 </script>

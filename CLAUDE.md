@@ -84,11 +84,18 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
   letzten Termin +90 Min). Abgehakte Termine erscheinen NIE als „jetzt"; läuft
   gerade nichts, rückt „Als Nächstes" als Hauptzeile vor, sind alle erledigt steht
   „Alle Termine erledigt ✓".
-- **„als Nächstes dran":** Am heutigen Tag bekommt der nächste *noch offene* Termin
-  in der Liste einen Akzent-Rahmen + „als Nächstes"-Pill (`.appt.next`). Auswahl
-  via `nextKeyToday()` (erster Termin mit Zeit > jetzt und nicht abgehakt),
-  Anwendung über `updateNextHighlight()`; wandert im Minutentakt und beim Abhaken
-  weiter (DOM bleibt erhalten, kein Re-Render der Liste).
+- **Listen-Zustände am Heute-Tag** (`updateTodayStates()`, konsistent zur
+  Heute-Karte; im Minutentakt + beim Abhaken aktualisiert, ohne Listen-Re-Render):
+  jede offene Karte bekommt genau eine Markierung —
+  - `.appt.now` (grün „jetzt") = laufender Termin (Slot-Modell, `runningKeyToday()`),
+  - `.appt.next` (blau „als Nächstes") = nächster offener Termin (`nextKeyToday()`),
+  - `.appt.overdue` (bernstein „überfällig") = offener Termin, dessen Zeit vorbei
+    ist und der nicht (mehr) läuft.
+  Abgehakte Karten (`.appt.done`) bleiben unberührt.
+- **Überfällig sichtbar machen:** Heute-Karte zeigt eine Zeile „N überfällig" +
+  frühesten offenen Rückstand (Pill `.pill.due`); im Zeitband wird ein überfälliger
+  Termin zum *bernsteinfarbenen, hohlen Punkt* (`.rdot.overdue`, voll deckend, anders
+  als der gedimmte „erledigt"-Ring). Bewusst Warn-Bernstein (`--warn`), kein Alarm-Rot.
 - **Stand im Kopf:** Die Wochenzeile zeigt zusätzlich „· Stand TT.MM." aus
   `meta.stand` (Footer trägt weiterhin den vollen „Stand … · Ausdruck …"-Text).
 - **Erledigte Termine im Zeitband:** ein abgehakter Termin erscheint als
