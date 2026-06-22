@@ -79,6 +79,13 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
   Zeitband mit Essens-Segmenten, Termin-Punkten (in Trakt-Bereichsfarben) und
   „jetzt"-Linie.
 - **An anderen Tagen** nur das Zeitband als „Tagesüberblick" (keine Uhr/jetzt).
+- **„als Nächstes dran":** Am heutigen Tag bekommt der nächste *noch offene* Termin
+  in der Liste einen Akzent-Rahmen + „als Nächstes"-Pill (`.appt.next`). Auswahl
+  via `nextKeyToday()` (erster Termin mit Zeit > jetzt und nicht abgehakt),
+  Anwendung über `updateNextHighlight()`; wandert im Minutentakt und beim Abhaken
+  weiter (DOM bleibt erhalten, kein Re-Render der Liste).
+- **Stand im Kopf:** Die Wochenzeile zeigt zusätzlich „· Stand TT.MM." aus
+  `meta.stand` (Footer trägt weiterhin den vollen „Stand … · Ausdruck …"-Text).
 - **Erledigte Termine im Zeitband:** ein abgehakter Termin erscheint als
   *gedimmter, hohler Ring* in Trakt-Farbe statt als vollem Punkt (offene Termine
   bleiben voll). Bewusst NICHT ganz ausgeblendet, damit der Tagesüberblick (Form
