@@ -16,6 +16,8 @@ die aber als Referenz/Vorlage aufbewahrt werden.
   - `mockup-karte.html` — Orientierungskarte (Vorlage für das Inline-SVG `mapSVG`).
   - `mockup-essenszeiten.html` / `mockup-heute.html` / `mockup-heute-vergleich.html`
     — Konzepte für Heute-Karte + Essenszeiten (gewählt wurde B+E).
+  - `mockup-ueberfaellig.html` — Vorschau der „überfällig"-Markierung (Liste +
+    Zeitband + Heute-Karte), am 2026-06-22 abgenommen und eingebaut.
 
 ## Warum archiviert?
 

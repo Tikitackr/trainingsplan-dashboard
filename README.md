@@ -8,9 +8,11 @@ Eine self-contained `index.html` — kein Build, keine Abhängigkeiten.
 ## Funktionen
 - Tag-Umschalter, aktueller Tag automatisch vorgewählt
 - Termine abhaken → durchgestrichen, Zustand bleibt (localStorage)
-- Heute-Karte mit Live-Uhr, laufendem/nächstem Termin, Essens-Status und
-  Zeitband (Tagesüberblick); erledigte Termine erscheinen im Zeitband als
-  gedimmter Ring, offene als voller Punkt
+- Heute-Karte mit Live-Uhr, laufendem/nächstem Termin, Essens-Status und Stand-Datum
+- Termin-Zustände am Heute-Tag farblich markiert: **jetzt** (grün), **als Nächstes**
+  (blau), **überfällig** (bernstein) — in Liste und Zeitband
+- Zeitband (Tagesüberblick): voller Punkt = offen/geplant, gedimmter Ring = erledigt,
+  bernsteinfarbener Punkt = überfällig
 - Raum antippen → automatisch gezeichnete Orientierungskarte (Ziel-Trakt leuchtet)
 - Hell/Dunkel-Umschalter, Fortschritt pro Tag
 
