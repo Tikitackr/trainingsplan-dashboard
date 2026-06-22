@@ -34,6 +34,7 @@
     --radius: 18px;
     --ok: #3fb950;
     --warn: #d29922;
+    --meal: #e9a23b;
     /* Bereichsfarben der Trakte (aus dem Lageplan) — themenunabhängig */
     --a: #f2cf3e; --b: #ef8b3f; --c: #e0533f;
     --d: #5b8fd4; --e: #2fb8a6; --f: #d65f96; --k: #b06fd0;
@@ -53,6 +54,7 @@
     --shadow: 0 8px 30px rgba(40,60,100,0.16);
     --ok: #1a7f37;
     --warn: #9a6700;
+    --meal: #c77f17;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { scroll-behavior: smooth; }
@@ -130,6 +132,35 @@
   .dayhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 2px 2px 12px; }
   .dayhead h1 { font-size: 21px; margin: 0; letter-spacing: -0.01em; }
   .dayhead .prog { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+  /* ---- Heute-Karte (Uhr/Jetzt + Zeitband) ---- */
+  .today { background: linear-gradient(135deg, rgba(10,132,255,.16), rgba(94,92,230,.13));
+    border: 1px solid var(--glass-border); border-radius: var(--radius);
+    box-shadow: var(--shadow), inset 0 1px 0 var(--glass-edge); padding: 14px 15px 12px; margin: 0 0 14px; }
+  .today:empty { display: none; }
+  .today .thead { display: flex; align-items: flex-start; gap: 13px; }
+  .today .clock { font-size: 27px; font-weight: 800; letter-spacing: -.02em; line-height: 1; white-space: nowrap; }
+  .today .clock small { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 3px; }
+  .today .lines { flex: 1; min-width: 0; font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; }
+  .today .lines .nx { color: var(--muted); font-size: 12.5px; }
+  .today .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 7px; vertical-align: middle; }
+  .today .pill.live { background: var(--ok); color: #04210d; }
+  .today .pill.meal { background: var(--meal); color: #241402; }
+  [data-theme="light"] .today .pill.live { color: #fff; }
+  [data-theme="light"] .today .pill.meal { color: #fff; }
+  .today .rcap { font-size: 13px; font-weight: 700; margin: 0 0 2px; }
+  .today .ribbon { position: relative; height: 26px; border-radius: 8px; background: var(--glass);
+    border: 1px solid var(--glass-border); margin: 13px 0 0; }
+  .today .ribbon .mseg { position: absolute; top: 0; bottom: 0; background: rgba(233,162,59,.30);
+    border-left: 1px solid rgba(233,162,59,.55); border-right: 1px solid rgba(233,162,59,.55); }
+  .today .ribbon .rdot { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
+    transform: translate(-50%,-50%); border: 2px solid var(--bg-1); }
+  .today .ribbon .rnow { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text); }
+  .today .rticks { position: relative; height: 13px; margin-top: 3px; color: var(--muted); font-size: 10px; }
+  .today .rticks span { position: absolute; transform: translateX(-50%); }
+  .today .rlegend { display: flex; gap: 14px; margin-top: 9px; font-size: 11px; color: var(--muted); }
+  .today .rlegend i { font-style: normal; }
+  .today .rlegend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
 
   /* ---- Termin-Karten ---- */
   .list { display: flex; flex-direction: column; gap: 10px; }
@@ -234,6 +265,8 @@
       <span class="prog" id="dayProg"></span>
     </div>
 
+    <div class="today" id="todayCard"></div>
+
     <div class="list" id="list"></div>
 
     <footer id="footer"></footer>
@@ -272,7 +305,13 @@
    Privatsphäre: KEINE Namen/Diagnosen/Zimmer/Pat.-Nr. — nur Zeit/Leistung/Raum.
    ===================================================================== */
 var PLAN_DEFAULT = {
-  meta: { woche: "22.–27. Juni 2026", stand: "2026-06-20", quelle: "Ausdruck 19.06.2026" },
+  meta: {
+    woche: "22.–27. Juni 2026", stand: "2026-06-20", quelle: "Ausdruck 19.06.2026",
+    essenszeiten: {
+      werktag:    [ {name:"Frühstück",von:"07:15",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:45"}, {name:"Abendessen",von:"17:00",bis:"18:30"} ],
+      wochenende: [ {name:"Frühstück",von:"07:30",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:30"}, {name:"Abendessen",von:"17:00",bis:"18:15"} ]
+    }
+  },
   tage: [
     { datum: "2026-06-22", dow: "Mo", termine: [
       { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
@@ -337,10 +376,26 @@ var PLAN_DEFAULT = {
   var dayTitle = document.getElementById('dayTitle');
   var dayProg = document.getElementById('dayProg');
   var listEl = document.getElementById('list');
+  var todayEl = document.getElementById('todayCard');
   var footer = document.getElementById('footer');
 
   var DOW_LANG = { Mo:'Montag', Di:'Dienstag', Mi:'Mittwoch', Do:'Donnerstag', Fr:'Freitag', Sa:'Samstag', So:'Sonntag' };
   function tagnum(datum){ var p = datum.split('-'); return p.length === 3 ? String(parseInt(p[2],10)) : datum; }
+  function escHtml(s){ return String(s).replace(/[&<>]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;' }[c]; }); }
+
+  // Zeit-/Essens-Helfer für die Heute-Karte
+  function toMin(t){ var p = String(t).split(':'); return (+p[0])*60 + (+p[1]); }
+  function nowMin(){ var d = new Date(); return d.getHours()*60 + d.getMinutes(); }
+  function fmtMin(x){ var h = Math.floor(x/60), m = x%60; return (h<10?'0':'')+h + ':' + (m<10?'0':'')+m; }
+  var ESSEN_DEFAULT = {
+    werktag:    [ {name:"Frühstück",von:"07:15",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:45"}, {name:"Abendessen",von:"17:00",bis:"18:30"} ],
+    wochenende: [ {name:"Frühstück",von:"07:30",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:30"}, {name:"Abendessen",von:"17:00",bis:"18:15"} ]
+  };
+  function essenSetFor(dow){
+    var e = (PLAN.meta && PLAN.meta.essenszeiten) || ESSEN_DEFAULT;
+    return (dow === 'Sa' || dow === 'So') ? (e.wochenende || e.werktag) : (e.werktag || ESSEN_DEFAULT.werktag);
+  }
+  function mealAt(min, set){ for (var i=0;i<set.length;i++){ if (min >= toMin(set[i].von) && min < toMin(set[i].bis)) return set[i]; } return null; }
 
   // Datum-Helfer
   function todayISO(){ try { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch(e){ return null; } }
@@ -372,9 +427,51 @@ var PLAN_DEFAULT = {
     if (tab) tab.classList.toggle('alldone', dayDone(tag));
   }
 
+  // Heute-Karte: am heutigen Tag voll (Uhr + Jetzt/Nächstes + Zeitband mit
+  // „jetzt"-Linie), an anderen Tagen nur das Zeitband als Tagesüberblick.
+  function renderTodayCard(){
+    var tag = DAYS[active];
+    if (!tag){ todayEl.innerHTML = ''; return; }
+    var isToday = (tag.datum === todayISO());
+    var set = essenSetFor(tag.dow);
+    var START = 7*60, END = 19*60, SP = END - START;
+    function px(x){ return Math.max(0, Math.min(100, (x - START) / SP * 100)); }
+    var h = '';
+    if (isToday){
+      var now = nowMin(), started = null, next = null;
+      tag.termine.forEach(function(t){ var x = toMin(t.zeit); if (x <= now) started = t; if (x > now && !next) next = t; });
+      var meal = mealAt(now, set);
+      h += '<div class="thead"><div class="clock">' + fmtMin(now) + '<small>heute</small></div><div class="lines">';
+      if (started) h += '<div><span class="pill live">jetzt</span> ' + escHtml(started.name) + '</div>';
+      else if (tag.termine.length) h += '<div>Gleich: ' + tag.termine[0].zeit + ' ' + escHtml(tag.termine[0].name) + '</div>';
+      else h += '<div>Keine Termine heute</div>';
+      if (meal) h += '<div><span class="pill meal">' + escHtml(meal.name) + ' bis ' + meal.bis + ' Uhr</span></div>';
+      if (next){ var d = toMin(next.zeit) - now; h += '<div class="nx">Als Nächstes: ' + next.zeit + ' ' + escHtml(next.name) + ' · in ' + Math.floor(d/60) + ' h ' + (d%60) + '</div>'; }
+      else if (tag.termine.length) h += '<div class="nx">Keine weiteren Termine heute</div>';
+      h += '</div></div>';
+    } else {
+      h += '<div class="rcap">' + (DOW_LANG[tag.dow] || tag.dow) + ' · Tagesüberblick</div>';
+    }
+    // Zeitband (immer)
+    h += '<div class="ribbon">';
+    set.forEach(function(M){ h += '<div class="mseg" style="left:' + px(toMin(M.von)) + '%;width:' + ((toMin(M.bis)-toMin(M.von))/SP*100) + '%"></div>'; });
+    tag.termine.forEach(function(t){
+      var tr = parseTrakt(t.raum); var col = tr ? ('var(--' + tr.toLowerCase() + ')') : 'var(--accent)';
+      h += '<div class="rdot" style="left:' + px(toMin(t.zeit)) + '%;background:' + col + '"></div>';
+    });
+    if (isToday){ var nm = nowMin(); if (nm >= START && nm <= END) h += '<div class="rnow" style="left:' + px(nm) + '%"></div>'; }
+    h += '</div><div class="rticks">';
+    [8,10,12,14,16,18].forEach(function(H){ h += '<span style="left:' + px(H*60) + '%">' + H + '</span>'; });
+    h += '</div><div class="rlegend"><i><span class="sw" style="background:rgba(233,162,59,.5)"></span>Essenszeit</i>'
+       + '<i><span class="sw" style="background:var(--accent)"></span>Termin</i>'
+       + (isToday ? '<i><span class="sw" style="background:var(--text)"></span>jetzt</i>' : '') + '</div>';
+    todayEl.innerHTML = h;
+  }
+
   function renderDay(){
     var tag = DAYS[active];
     listEl.innerHTML = '';
+    renderTodayCard();
     if (!tag){ return; }
     dayTitle.textContent = DOW_LANG[tag.dow] || tag.dow;
     if (!tag.termine.length){
@@ -579,6 +676,13 @@ var PLAN_DEFAULT = {
         .catch(function(){ /* offline / file:// — Start-Plan bleibt */ });
     } catch(e){}
   })();
+
+  // 3) Live-Uhr: solange der heutige Tag angezeigt wird, die Heute-Karte
+  //    minütlich auffrischen (Uhr, „jetzt"-Linie, Jetzt/Nächstes).
+  setInterval(function(){
+    var tag = DAYS[active];
+    if (tag && tag.datum === todayISO()) renderTodayCard();
+  }, 30000);
 })();
 </script>
 </body>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mockup · Heute-Karte: zwei Designs nebeneinander</title>
+<style>
+  :root{
+    --accent:#0a84ff;--accent-2:#5e5ce6;--grad:linear-gradient(135deg,#0a84ff,#5e5ce6);
+    --bg-0:#0a0e17;--bg-1:#0f1626;--text:#e6edf3;--muted:#9aa4b2;
+    --glass:rgba(255,255,255,0.07);--glass-strong:rgba(255,255,255,0.10);
+    --glass-border:rgba(255,255,255,0.12);--glass-edge:rgba(255,255,255,0.28);
+    --panel:rgba(18,24,38,0.72);--card:rgba(16,22,36,0.66);--shadow:0 8px 32px rgba(0,0,0,0.45);
+    --radius:18px;--ok:#3fb950;--warn:#d29922;--meal:#e9a23b;
+    --a:#f2cf3e;--b:#ef8b3f;--c:#e0533f;--d:#5b8fd4;--e:#2fb8a6;--f:#d65f96;--k:#b06fd0;
+  }
+  [data-theme="light"]{
+    --accent:#007aff;--bg-0:#e9eef6;--bg-1:#fff;--text:#1f2328;--muted:#5b6675;
+    --glass:rgba(255,255,255,0.6);--glass-strong:rgba(255,255,255,0.72);
+    --glass-border:rgba(255,255,255,0.7);--glass-edge:rgba(255,255,255,0.9);
+    --panel:rgba(255,255,255,0.82);--card:rgba(255,255,255,0.78);
+    --shadow:0 8px 30px rgba(40,60,100,0.16);--ok:#1a7f37;--meal:#c77f17;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--text);background:var(--bg-1);line-height:1.55;min-height:100vh;padding:18px 0 60px}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(60vw 60vw at 12% 8%,rgba(10,132,255,.32),transparent 60%),
+    radial-gradient(50vw 50vw at 88% 22%,rgba(94,92,230,.26),transparent 60%),
+    radial-gradient(55vw 55vw at 70% 90%,rgba(64,156,255,.18),transparent 60%),
+    linear-gradient(160deg,var(--bg-0),var(--bg-1))}
+  [data-theme="light"] body::before{background:
+    radial-gradient(60vw 60vw at 12% 8%,rgba(0,122,255,.14),transparent 60%),
+    radial-gradient(50vw 50vw at 88% 22%,rgba(94,92,230,.12),transparent 60%),
+    linear-gradient(160deg,var(--bg-0),var(--bg-1))}
+
+  .pagehead{max-width:780px;margin:0 auto 16px;padding:0 14px;display:flex;align-items:center;gap:12px}
+  .pagehead h1{font-size:17px;margin:0;flex:1}
+  .theme-btn{width:40px;height:40px;display:grid;place-items:center;background:var(--glass);
+    border:1px solid var(--glass-border);border-radius:12px;color:var(--text);cursor:pointer;font-size:16px}
+
+  .compare{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;padding:0 14px}
+  .col{flex:1 1 330px;max-width:360px}
+  .collabel{text-align:center;font-size:13px;font-weight:700;margin:0 0 4px}
+  .colsub{text-align:center;font-size:11.5px;color:var(--muted);margin:0 0 12px}
+
+  .header{padding:12px 14px;display:flex;align-items:center;gap:10px;background:var(--panel);
+    backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+    border:1px solid var(--glass-border);border-radius:14px;margin-bottom:12px}
+  .header .logo{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;background:var(--grad);border-radius:9px;color:#fff}
+  .header .logo svg{width:18px;height:18px}
+  .header .titles{flex:1}.header .titles .t{font-weight:700;font-size:15px}
+  .header .titles .s{color:var(--muted);font-size:11.5px}
+
+  .days{display:flex;gap:5px;padding:4px;margin:0 0 12px;background:var(--glass);
+    border:1px solid var(--glass-border);border-radius:13px}
+  .day-tab{flex:1 1 0;padding:6px 4px;border-radius:9px;text-align:center}
+  .day-tab .dow{font-size:11px;color:var(--muted);font-weight:600}
+  .day-tab .dnum{font-size:16px;font-weight:700}
+  .day-tab.active{background:var(--grad);color:#fff}.day-tab.active .dow{color:rgba(255,255,255,.85)}
+
+  .dayhead{display:flex;align-items:baseline;justify-content:space-between;margin:2px 2px 12px}
+  .dayhead h1{font-size:19px;margin:0}.dayhead .prog{font-size:12.5px;color:var(--muted)}
+
+  /* Heute-Karte: zwei Varianten */
+  .today{border-radius:var(--radius);box-shadow:var(--shadow),inset 0 1px 0 var(--glass-edge);
+    padding:13px 14px 11px;margin:0 0 12px;border:1px solid var(--glass-border)}
+  .today.accent{background:linear-gradient(135deg,rgba(10,132,255,.16),rgba(94,92,230,.13))}
+  .today.plain{background:var(--card)}
+  .today .thead{display:flex;align-items:flex-start;gap:12px}
+  .today .clock{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1;white-space:nowrap}
+  .today .clock small{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:3px}
+  .today .lines{flex:1;min-width:0;font-size:13px;display:flex;flex-direction:column;gap:4px}
+  .today .lines .nx{color:var(--muted);font-size:12px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:7px}
+  .pill.live{background:var(--ok);color:#04210d}
+  .pill.meal{background:var(--meal);color:#241402}
+  /* plain-Variante: Essen dezenter als Outline statt Vollfläche */
+  .today.plain .pill.meal{background:transparent;color:var(--meal);border:1px solid var(--meal)}
+
+  .ribbon{position:relative;height:24px;border-radius:8px;background:var(--glass);
+    border:1px solid var(--glass-border);margin:12px 0 0}
+  .ribbon .mseg{position:absolute;top:0;bottom:0;background:rgba(233,162,59,.30);
+    border-left:1px solid rgba(233,162,59,.55);border-right:1px solid rgba(233,162,59,.55)}
+  .ribbon .rdot{position:absolute;top:50%;width:9px;height:9px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid var(--bg-1)}
+  .ribbon .rnow{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text)}
+  .rticks{position:relative;height:13px;margin-top:3px;color:var(--muted);font-size:10px}
+  .rticks span{position:absolute;transform:translateX(-50%)}
+
+  .appt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:var(--card);
+    border:1px solid var(--glass-border);border-radius:15px;box-shadow:var(--shadow),inset 0 1px 0 var(--glass-edge);margin-bottom:9px}
+  .appt .check{flex:0 0 24px;width:24px;height:24px;margin-top:2px;border:2px solid var(--glass-border);border-radius:8px}
+  .appt .time{font-size:17px;font-weight:700}.appt .name{font-size:14px;margin-top:1px}
+  .room{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:5px 10px;border-radius:9px;
+    background:var(--glass);border:1px solid var(--glass-border);color:var(--accent);font-size:12.5px;font-weight:600}
+</style>
+</head>
+<body>
+  <div class="pagehead">
+    <h1>Heute-Karte · zwei Designs im Vergleich</h1>
+    <button class="theme-btn" onclick="var r=document.documentElement;r.setAttribute('data-theme',r.getAttribute('data-theme')==='light'?'dark':'light')">☾</button>
+  </div>
+  <div class="compare">
+    <div class="col">
+      <p class="collabel">So wie jetzt</p>
+      <p class="colsub">Akzent-Karte, hebt sich als „Hero" ab</p>
+      <div id="colA"></div>
+    </div>
+    <div class="col">
+      <p class="collabel">An die Karten angepasst</p>
+      <p class="colsub">Neutrales Glas wie die Termine, fügt sich ein</p>
+      <div id="colB"></div>
+    </div>
+  </div>
+
+<script>
+  var TERMINE=[
+    {zeit:'08:55',name:'Übungsgruppe',raum:'Trakt E · Sporthalle',trakt:'e'},
+    {zeit:'10:40',name:'Hydrojetmassage',raum:'Trakt C · Therapiebereich 1',trakt:'c'},
+    {zeit:'11:30',name:'Gymnastik HWS/LWS',raum:'Trakt D · Gymn.halle',trakt:'d'},
+    {zeit:'14:15',name:'Atem- + Muskelentspannung',raum:'Kesselhaus · Vortragssaal',trakt:'k'}
+  ];
+  var MAHL=[{name:'Frühstück',von:'07:15',bis:'09:00'},{name:'Mittag',von:'11:30',bis:'12:45'},{name:'Abendessen',von:'17:00',bis:'18:30'}];
+  var NOW='11:32';
+  function m(t){var p=t.split(':');return (+p[0])*60+(+p[1]);}
+  function mealOf(t){var x=m(t);for(var i=0;i<MAHL.length;i++){if(x>=m(MAHL[i].von)&&x<m(MAHL[i].bis))return MAHL[i];}return null;}
+
+  function todayCard(variant){
+    var now=m(NOW),started=null,next=null;
+    TERMINE.forEach(function(T){if(m(T.zeit)<=now)started=T;if(m(T.zeit)>now&&!next)next=T;});
+    var meal=mealOf(NOW);
+    var h='<div class="today '+variant+'"><div class="thead"><div class="clock">'+NOW+'<small>Mo, 22. Juni</small></div><div class="lines">';
+    h+='<div>'+(started?'<span class="pill live">läuft</span> '+started.name:'gleich geht’s los')+'</div>';
+    if(meal)h+='<div><span class="pill meal">'+meal.name+' bis '+meal.bis+'</span></div>';
+    if(next){var d=m(next.zeit)-now;h+='<div class="nx">Als Nächstes: '+next.zeit+' '+next.name+' · in '+Math.floor(d/60)+' h '+(d%60)+'</div>';}
+    h+='</div></div>';
+    var START=7*60,END=18.75*60,SP=END-START;function p(x){return (x-START)/SP*100;}
+    h+='<div class="ribbon">';
+    MAHL.forEach(function(M){h+='<div class="mseg" style="left:'+p(m(M.von))+'%;width:'+((m(M.bis)-m(M.von))/SP*100)+'%"></div>';});
+    TERMINE.forEach(function(T){h+='<div class="rdot" style="left:'+p(m(T.zeit))+'%;background:var(--'+T.trakt+')"></div>';});
+    h+='<div class="rnow" style="left:'+p(now)+'%"></div></div><div class="rticks">';
+    [8,10,12,14,16,18].forEach(function(H){h+='<span style="left:'+p(H*60)+'%">'+H+'</span>';});
+    h+='</div>';
+    return h;
+  }
+
+  function column(variant){
+    var PIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/></svg>';
+    var h='<div class="header"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2v4M16 2v4M8.5 14l2 2 4-4"/></svg></span><div class="titles"><div class="t">Trainingsplan</div><div class="s">22.–27. Juni 2026</div></div></div>';
+    h+='<div class="days">';
+    [['Mo',22,1],['Di',23,0],['Mi',24,0],['Do',25,0],['Fr',26,0],['Sa',27,0]].forEach(function(d){
+      h+='<div class="day-tab'+(d[2]?' active':'')+'"><div class="dow">'+d[0]+'</div><div class="dnum">'+d[1]+'</div></div>';});
+    h+='</div><div class="dayhead"><h1>Montag</h1><span class="prog">0 / 4 erledigt</span></div>';
+    h+=todayCard(variant);
+    TERMINE.forEach(function(T){
+      h+='<div class="appt"><div class="check"></div><div class="body"><div class="time">'+T.zeit
+        +'</div><div class="name">'+T.name+'</div><button class="room">'+PIN+'<span>'+T.raum+'</span></button></div></div>';
+    });
+    return h;
+  }
+  document.getElementById('colA').innerHTML=column('accent');
+  document.getElementById('colB').innerHTML=column('plain');
+</script>
+</body>
+</html>

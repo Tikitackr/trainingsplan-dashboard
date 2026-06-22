@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mockup · Heute-Karte (B + E) im Dashboard</title>
+<style>
+  :root{
+    --accent:#0a84ff;--accent-2:#5e5ce6;--grad:linear-gradient(135deg,#0a84ff,#5e5ce6);
+    --bg-0:#0a0e17;--bg-1:#0f1626;--text:#e6edf3;--muted:#9aa4b2;
+    --glass:rgba(255,255,255,0.07);--glass-strong:rgba(255,255,255,0.10);
+    --glass-border:rgba(255,255,255,0.12);--glass-edge:rgba(255,255,255,0.28);
+    --panel:rgba(18,24,38,0.72);--card:rgba(16,22,36,0.66);--shadow:0 8px 32px rgba(0,0,0,0.45);
+    --radius:18px;--ok:#3fb950;--warn:#d29922;--meal:#e9a23b;
+    --a:#f2cf3e;--b:#ef8b3f;--c:#e0533f;--d:#5b8fd4;--e:#2fb8a6;--f:#d65f96;--k:#b06fd0;
+  }
+  [data-theme="light"]{
+    --accent:#007aff;--bg-0:#e9eef6;--bg-1:#fff;--text:#1f2328;--muted:#5b6675;
+    --glass:rgba(255,255,255,0.6);--glass-strong:rgba(255,255,255,0.72);
+    --glass-border:rgba(255,255,255,0.7);--glass-edge:rgba(255,255,255,0.9);
+    --panel:rgba(255,255,255,0.82);--card:rgba(255,255,255,0.78);
+    --shadow:0 8px 30px rgba(40,60,100,0.16);--ok:#1a7f37;--meal:#c77f17;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--text);background:var(--bg-1);line-height:1.55;min-height:100vh;
+    padding:env(safe-area-inset-top) 0 60px}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(60vw 60vw at 12% 8%,rgba(10,132,255,.32),transparent 60%),
+    radial-gradient(50vw 50vw at 88% 22%,rgba(94,92,230,.26),transparent 60%),
+    radial-gradient(55vw 55vw at 70% 90%,rgba(64,156,255,.18),transparent 60%),
+    linear-gradient(160deg,var(--bg-0),var(--bg-1))}
+  [data-theme="light"] body::before{background:
+    radial-gradient(60vw 60vw at 12% 8%,rgba(0,122,255,.14),transparent 60%),
+    radial-gradient(50vw 50vw at 88% 22%,rgba(94,92,230,.12),transparent 60%),
+    linear-gradient(160deg,var(--bg-0),var(--bg-1))}
+  .wrap{max-width:560px;margin:0 auto;padding:0 14px}
+
+  .header{margin:0 -14px 12px;padding:14px 16px 12px;display:flex;align-items:center;gap:12px;
+    background:var(--panel);backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--glass-border)}
+  .header .logo{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;
+    background:var(--grad);border-radius:11px;color:#fff}
+  .header .logo svg{width:22px;height:22px}
+  .header .titles{flex:1}
+  .header .titles .t{font-weight:700;font-size:17px;line-height:1.2}
+  .header .titles .s{color:var(--muted);font-size:12.5px}
+  .theme-btn{width:40px;height:40px;display:grid;place-items:center;background:var(--glass);
+    border:1px solid var(--glass-border);border-radius:12px;color:var(--text);cursor:pointer;font-size:16px}
+
+  .days{display:flex;gap:6px;padding:5px;margin:0 0 14px;background:var(--glass);
+    border:1px solid var(--glass-border);border-radius:14px;box-shadow:inset 0 1px 0 var(--glass-edge);overflow-x:auto}
+  .day-tab{flex:1 1 0;min-width:54px;border:none;cursor:pointer;padding:8px 6px;border-radius:10px;
+    background:transparent;color:var(--text);font-family:inherit;text-align:center}
+  .day-tab .dow{font-size:12px;color:var(--muted);font-weight:600}
+  .day-tab .dnum{font-size:18px;font-weight:700;line-height:1.15}
+  .day-tab.active{background:var(--grad);color:#fff}
+  .day-tab.active .dow{color:rgba(255,255,255,.85)}
+
+  .dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:2px 2px 12px}
+  .dayhead h1{font-size:21px;margin:0}
+  .dayhead .prog{font-size:13px;color:var(--muted)}
+
+  /* ---- Heute-Karte (B + E kombiniert) ---- */
+  .today{background:linear-gradient(135deg,rgba(10,132,255,.16),rgba(94,92,230,.13));
+    border:1px solid var(--glass-border);border-radius:var(--radius);
+    box-shadow:var(--shadow),inset 0 1px 0 var(--glass-edge);padding:14px 15px 12px;margin:0 0 14px}
+  .today .thead{display:flex;align-items:flex-start;gap:13px}
+  .today .clock{font-size:27px;font-weight:800;letter-spacing:-.02em;line-height:1;white-space:nowrap}
+  .today .clock small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:3px}
+  .today .lines{flex:1;min-width:0;font-size:13.5px;display:flex;flex-direction:column;gap:4px}
+  .today .lines .nx{color:var(--muted);font-size:12.5px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:7px;vertical-align:middle}
+  .pill.live{background:var(--ok);color:#04210d}
+  .pill.meal{background:var(--meal);color:#241402}
+
+  .ribbon{position:relative;height:26px;border-radius:8px;background:var(--glass);
+    border:1px solid var(--glass-border);margin:13px 0 0}
+  .ribbon .mseg{position:absolute;top:0;bottom:0;background:rgba(233,162,59,.30);
+    border-left:1px solid rgba(233,162,59,.55);border-right:1px solid rgba(233,162,59,.55)}
+  .ribbon .rdot{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;
+    transform:translate(-50%,-50%);border:2px solid var(--bg-1)}
+  .ribbon .rnow{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text)}
+  .rticks{position:relative;height:13px;margin-top:3px;color:var(--muted);font-size:10px}
+  .rticks span{position:absolute;transform:translateX(-50%)}
+  .rlegend{display:flex;gap:14px;margin-top:9px;font-size:11px;color:var(--muted)}
+  .rlegend i{font-style:normal}.rlegend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;
+    vertical-align:-1px;margin-right:4px}
+
+  /* ---- Liste + Harmonika (wie im echten Dashboard) ---- */
+  .list{display:flex;flex-direction:column;gap:10px}
+  .appt{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;background:var(--card);
+    border:1px solid var(--glass-border);border-radius:16px;
+    box-shadow:var(--shadow),inset 0 1px 0 var(--glass-edge);cursor:pointer;overflow:hidden;max-height:320px;
+    transition:max-height .28s ease,padding .28s ease,opacity .2s}
+  .appt .check{flex:0 0 26px;width:26px;height:26px;margin-top:2px;border:2px solid var(--glass-border);
+    border-radius:9px;display:grid;place-items:center}
+  .appt .check svg{width:15px;height:15px;color:#fff;opacity:0}
+  .appt .time{font-size:19px;font-weight:700}
+  .appt .name{font-size:15px;margin-top:1px}
+  .room{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:6px 11px;border-radius:10px;
+    background:var(--glass);border:1px solid var(--glass-border);color:var(--accent);font-size:13px;font-weight:600}
+  .room svg{width:14px;height:14px}
+  .appt.done{opacity:.55;max-height:48px;padding-top:9px;padding-bottom:9px}
+  .appt.done .check{background:var(--grad);border-color:transparent;margin-top:0}
+  .appt.done .check svg{opacity:1}
+  .appt.done .time,.appt.done .name{display:inline;text-decoration:line-through}
+  .appt.done .time{font-size:15px;margin-right:7px}.appt.done .name{font-size:14px}
+
+  .note-hint{margin:18px 2px 0;color:var(--muted);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2v4M16 2v4M8.5 14l2 2 4-4"/></svg></span>
+    <div class="titles"><div class="t">Trainingsplan</div><div class="s">22.–27. Juni 2026</div></div>
+    <button class="theme-btn" onclick="var r=document.documentElement;r.setAttribute('data-theme',r.getAttribute('data-theme')==='light'?'dark':'light')">☾</button>
+  </div>
+
+  <div class="days">
+    <div class="day-tab active"><div class="dow">Mo</div><div class="dnum">22</div></div>
+    <div class="day-tab"><div class="dow">Di</div><div class="dnum">23</div></div>
+    <div class="day-tab"><div class="dow">Mi</div><div class="dnum">24</div></div>
+    <div class="day-tab"><div class="dow">Do</div><div class="dnum">25</div></div>
+    <div class="day-tab"><div class="dow">Fr</div><div class="dnum">26</div></div>
+    <div class="day-tab"><div class="dow">Sa</div><div class="dnum">27</div></div>
+  </div>
+
+  <div class="dayhead"><h1>Montag</h1><span class="prog">0 / 4 erledigt</span></div>
+
+  <!-- HEUTE-KARTE: B (Jetzt/Nächstes) oben + E (Zeitband) unten -->
+  <div class="today" id="today"></div>
+
+  <div class="list" id="list"></div>
+
+  <p class="note-hint">Tipp: Termine antippen — sie haken ab und ziehen sich zusammen (wie im echten Dashboard). Simulierte Uhrzeit 11:32.</p>
+</div>
+
+<script>
+  var TERMINE=[
+    {zeit:'08:55',name:'Übungsgruppe',raum:'Trakt E · Sporthalle',trakt:'e'},
+    {zeit:'10:40',name:'Hydrojetmassage',raum:'Trakt C · Therapiebereich 1',trakt:'c'},
+    {zeit:'11:30',name:'Gymnastik HWS/LWS',raum:'Trakt D · Gymn.halle',trakt:'d'},
+    {zeit:'14:15',name:'Atem- + Muskelentspannung',raum:'Kesselhaus · Vortragssaal',trakt:'k'}
+  ];
+  var MAHL=[
+    {name:'Frühstück',von:'07:15',bis:'09:00'},
+    {name:'Mittag',von:'11:30',bis:'12:45'},
+    {name:'Abendessen',von:'17:00',bis:'18:30'}
+  ];
+  var NOW='11:32';
+  function m(t){var p=t.split(':');return (+p[0])*60+(+p[1]);}
+  function mealOf(t){var x=m(t);for(var i=0;i<MAHL.length;i++){if(x>=m(MAHL[i].von)&&x<m(MAHL[i].bis))return MAHL[i];}return null;}
+
+  /* Heute-Karte: B oben, E unten */
+  (function(){
+    var now=m(NOW),started=null,next=null;
+    TERMINE.forEach(function(T){if(m(T.zeit)<=now)started=T;if(m(T.zeit)>now&&!next)next=T;});
+    var meal=mealOf(NOW);
+    var h='<div class="thead"><div class="clock">'+NOW+'<small>Mo, 22. Juni</small></div><div class="lines">';
+    h+='<div>'+(started?'<span class="pill live">läuft</span> '+started.name:'gleich geht’s los')+'</div>';
+    if(meal){var rest=m(meal.bis)-now;h+='<div><span class="pill meal">🍽 '+meal.name+' bis '+meal.bis+'</span></div>';}
+    if(next){var d=m(next.zeit)-now;h+='<div class="nx">Als Nächstes: '+next.zeit+' '+next.name+' · in '+Math.floor(d/60)+' h '+(d%60)+'</div>';}
+    h+='</div></div>';
+    // Zeitband
+    var START=7*60,END=18.75*60,SP=END-START;
+    function p(x){return (x-START)/SP*100;}
+    h+='<div class="ribbon">';
+    MAHL.forEach(function(M){h+='<div class="mseg" style="left:'+p(m(M.von))+'%;width:'+((m(M.bis)-m(M.von))/SP*100)+'%"></div>';});
+    TERMINE.forEach(function(T){h+='<div class="rdot" style="left:'+p(m(T.zeit))+'%;background:var(--'+T.trakt+')"></div>';});
+    h+='<div class="rnow" style="left:'+p(now)+'%"></div></div>';
+    h+='<div class="rticks">';[8,10,12,14,16,18].forEach(function(H){h+='<span style="left:'+p(H*60)+'%">'+H+'</span>';});h+='</div>';
+    h+='<div class="rlegend"><i><span class="sw" style="background:rgba(233,162,59,.5)"></span>Essenszeit</i>'
+      +'<i><span class="sw" style="background:var(--accent)"></span>Termin</i>'
+      +'<i><span class="sw" style="background:var(--text)"></span>jetzt</i></div>';
+    document.getElementById('today').innerHTML=h;
+  })();
+
+  /* Liste + Harmonika */
+  (function(){
+    var box=document.getElementById('list'),h='';
+    var PIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/></svg>';
+    TERMINE.forEach(function(T){
+      h+='<div class="appt" onclick="this.classList.toggle(\'done\')">'
+        +'<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l4 4L19 7"/></svg></div>'
+        +'<div class="body"><div class="time">'+T.zeit+'</div><div class="name">'+T.name+'</div>'
+        +'<button class="room">'+PIN+'<span>'+T.raum+'</span></button></div></div>';
+    });
+    box.innerHTML=h;
+  })();
+</script>
+</body>
+</html>

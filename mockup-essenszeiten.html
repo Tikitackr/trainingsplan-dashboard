@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mockup · Essenszeiten & Uhrzeit (5 Konzepte)</title>
+<style>
+  :root {
+    --accent:#0a84ff; --accent-2:#5e5ce6; --grad:linear-gradient(135deg,#0a84ff,#5e5ce6);
+    --bg-0:#0a0e17; --bg-1:#0f1626; --text:#e6edf3; --muted:#9aa4b2;
+    --glass:rgba(255,255,255,0.07); --glass-strong:rgba(255,255,255,0.10);
+    --glass-border:rgba(255,255,255,0.12); --glass-edge:rgba(255,255,255,0.28);
+    --card:rgba(16,22,36,0.66); --shadow:0 8px 32px rgba(0,0,0,0.45);
+    --ok:#3fb950; --warn:#d29922; --meal:#e9a23b;
+    --a:#f2cf3e; --b:#ef8b3f; --c:#e0533f; --d:#5b8fd4; --e:#2fb8a6; --f:#d65f96; --k:#b06fd0;
+  }
+  [data-theme="light"]{
+    --bg-0:#e9eef6; --bg-1:#fff; --text:#1f2328; --muted:#5b6675;
+    --glass:rgba(255,255,255,0.6); --glass-strong:rgba(255,255,255,0.72);
+    --glass-border:rgba(255,255,255,0.7); --glass-edge:rgba(255,255,255,0.9);
+    --card:rgba(255,255,255,0.78); --shadow:0 8px 30px rgba(40,60,100,0.16); --meal:#c77f17;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--text);background:var(--bg-1);line-height:1.5;min-height:100vh;
+    padding:env(safe-area-inset-top) 0 60px}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(60vw 60vw at 12% 8%,rgba(10,132,255,.32),transparent 60%),
+    radial-gradient(50vw 50vw at 88% 22%,rgba(94,92,230,.26),transparent 60%),
+    radial-gradient(55vw 55vw at 70% 90%,rgba(64,156,255,.18),transparent 60%),
+    linear-gradient(160deg,var(--bg-0),var(--bg-1))}
+  [data-theme="light"] body::before{background:
+    radial-gradient(60vw 60vw at 12% 8%,rgba(0,122,255,.14),transparent 60%),
+    radial-gradient(50vw 50vw at 88% 22%,rgba(94,92,230,.12),transparent 60%),
+    linear-gradient(160deg,var(--bg-0),var(--bg-1))}
+  .wrap{max-width:560px;margin:0 auto;padding:16px 14px}
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .top h1{font-size:18px;margin:0;flex:1}
+  .tbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--glass-border);
+    background:var(--glass);color:var(--text);cursor:pointer;font-size:15px}
+  .lead{color:var(--muted);font-size:13px;margin:0 2px 22px}
+  .lead b{color:var(--text)}
+
+  section{margin:0 0 34px}
+  .stag{display:inline-flex;align-items:center;gap:8px;margin:0 0 4px}
+  .stag .n{width:22px;height:22px;border-radius:7px;background:var(--grad);color:#fff;
+    display:grid;place-items:center;font-weight:700;font-size:12px}
+  .stag h2{font-size:16px;margin:0}
+  .sdesc{color:var(--muted);font-size:12.5px;margin:0 0 12px 30px}
+
+  .panel{background:var(--card);border:1px solid var(--glass-border);border-radius:18px;
+    box-shadow:var(--shadow),inset 0 1px 0 var(--glass-edge);padding:14px}
+
+  /* gemeinsame Termin-Optik */
+  .ap{display:flex;gap:12px;align-items:flex-start;padding:11px 13px;background:var(--glass);
+    border:1px solid var(--glass-border);border-radius:14px}
+  .ap .t{font-weight:700;font-size:16px;min-width:46px}
+  .ap .nm{font-size:14px}
+  .ap .rm{font-size:12px;color:var(--muted);margin-top:3px}
+  .meal-tag{display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;
+    font-weight:600;color:var(--meal)}
+  .fork{font-size:13px}
+
+  /* A — Zeitstrahl */
+  .axis{position:relative;margin-top:4px}
+  .axis .hour{position:absolute;left:0;width:34px;text-align:right;color:var(--muted);
+    font-size:11px;transform:translateY(-7px)}
+  .axis .grid{position:absolute;left:40px;right:0;border-top:1px dashed var(--glass-border)}
+  .band{position:absolute;left:40px;right:0;border-radius:9px;
+    background:linear-gradient(90deg,rgba(233,162,59,.20),rgba(233,162,59,.10));
+    border:1px solid rgba(233,162,59,.35)}
+  .band .bl{position:absolute;top:3px;left:9px;font-size:10.5px;font-weight:700;color:var(--meal)}
+  .tcard{position:absolute;left:54px;right:6px;background:var(--card);
+    border:1px solid var(--glass-border);border-radius:11px;padding:7px 10px;
+    box-shadow:0 4px 14px rgba(0,0,0,.3)}
+  .tcard.hit{border-color:rgba(233,162,59,.7)}
+  .tcard .tt{font-weight:700;font-size:13px}
+  .tcard .tn{font-size:12px;color:var(--text)}
+  .tcard .tf{font-size:11px;color:var(--meal);font-weight:600;margin-top:2px}
+  .nowline{position:absolute;left:40px;right:0;height:0;border-top:2px solid var(--accent)}
+  .nowline .nb{position:absolute;right:0;top:-9px;background:var(--accent);color:#fff;
+    font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px}
+  .nowdot{position:absolute;left:36px;width:9px;height:9px;border-radius:50%;
+    background:var(--accent);transform:translateX(-50%);margin-top:-4px}
+
+  /* B — Fokuskarte */
+  .focus{background:linear-gradient(135deg,rgba(10,132,255,.16),rgba(94,92,230,.14));
+    border:1px solid var(--glass-border)}
+  .focus .clk{font-size:30px;font-weight:800;letter-spacing:-.02em}
+  .focus .row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:14px}
+  .focus .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;width:78px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:8px}
+  .pill.live{background:var(--ok);color:#04210d}
+  .pill.meal{background:var(--meal);color:#241402}
+  .pill.next{background:var(--glass-strong);color:var(--text)}
+
+  /* C — Assistent */
+  .cwhen .line{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--glass-border)}
+  .cwhen .line:last-child{border-bottom:none}
+  .cwhen .mn{font-weight:700;width:92px;font-size:13px}
+  .cwhen .mn small{display:block;color:var(--muted);font-weight:500;font-size:11px}
+  .cwhen .tip{font-size:13px;flex:1}
+  .cwhen .ok{color:var(--ok)} .cwhen .tight{color:var(--meal)}
+
+  /* E — Ribbon */
+  .ribbon{position:relative;height:30px;border-radius:9px;background:var(--glass);
+    border:1px solid var(--glass-border);margin:14px 0 24px;overflow:visible}
+  .ribbon .mseg{position:absolute;top:0;bottom:0;background:rgba(233,162,59,.30);
+    border-left:1px solid rgba(233,162,59,.5);border-right:1px solid rgba(233,162,59,.5)}
+  .ribbon .rdot{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;
+    background:var(--accent);transform:translate(-50%,-50%);border:2px solid var(--bg-1)}
+  .ribbon .rnow{position:absolute;top:-5px;bottom:-5px;width:2px;background:#fff;
+    box-shadow:0 0 6px rgba(255,255,255,.8)}
+  .ribbon .rnow::after{content:'jetzt';position:absolute;top:-15px;left:50%;transform:translateX(-50%);
+    font-size:9px;font-weight:700;color:#fff;white-space:nowrap}
+  .rticks{position:relative;height:14px;color:var(--muted);font-size:10px}
+  .rticks span{position:absolute;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Essenszeiten &amp; Uhrzeit · 5 Konzepte</h1>
+    <button class="tbtn" onclick="var r=document.documentElement;r.setAttribute('data-theme',r.getAttribute('data-theme')==='light'?'dark':'light')">☾</button>
+  </div>
+  <p class="lead">Daten = <b>Montag</b> (deine aktuelle Woche). Simulierte Uhrzeit <b>11:32</b>,
+    damit „läuft jetzt" sichtbar wird. Essenszeiten Mo–Fr: Frühstück 7:15–9:00 ·
+    Mittag 11:30–12:45 · Abendessen 17:00–18:30.</p>
+
+  <section><div class="stag"><span class="n">A</span><h2>Vertikaler Tages-Zeitstrahl</h2></div>
+    <p class="sdesc">Zeitachse mit Essens-Bändern im Hintergrund + wandernder „jetzt"-Linie. Kollision = Termin liegt auf dem Band.</p>
+    <div class="panel"><div class="axis" id="cA"></div></div></section>
+
+  <section><div class="stag"><span class="n">B</span><h2>„Jetzt &amp; Nächstes"-Fokuskarte</h2></div>
+    <p class="sdesc">Live-Uhr, was läuft, was als Nächstes kommt, Countdown, Essens-Status.</p>
+    <div class="panel focus" id="cB"></div></section>
+
+  <section><div class="stag"><span class="n">C</span><h2>„Wann essen?"-Assistent</h2></div>
+    <p class="sdesc">Rechnet aus Terminen + Essenszeiten, wann du realistisch essen kannst.</p>
+    <div class="panel cwhen" id="cC"></div></section>
+
+  <section><div class="stag"><span class="n">D</span><h2>Essens-Ampel je Termin</h2></div>
+    <p class="sdesc">Normale Liste, nur Termine im Essensfenster bekommen eine Gabel-Markierung (+ Countdown beim aktuellen).</p>
+    <div id="cD" style="display:flex;flex-direction:column;gap:10px"></div></section>
+
+  <section><div class="stag"><span class="n">E</span><h2>Mini-Zeitband im Kopf</h2></div>
+    <p class="sdesc">Schmale Tagesleiste: Punkte = Termine, schattiert = Essen, weiße Linie = jetzt.</p>
+    <div class="panel">
+      <div class="ribbon" id="cE"></div>
+      <div class="rticks" id="cEt"></div>
+    </div></section>
+</div>
+
+<script>
+  var TERMINE=[
+    {zeit:'08:55',name:'Übungsgruppe',raum:'Trakt E · Sporthalle'},
+    {zeit:'10:40',name:'Hydrojetmassage',raum:'Trakt C · Therapiebereich 1'},
+    {zeit:'11:30',name:'Gymnastik HWS/LWS',raum:'Trakt D · Gymn.halle'},
+    {zeit:'14:15',name:'Atem- + Muskelentspannung',raum:'Kesselhaus · Vortragssaal'}
+  ];
+  var MAHL=[
+    {name:'Frühstück',von:'07:15',bis:'09:00'},
+    {name:'Mittag',von:'11:30',bis:'12:45'},
+    {name:'Abendessen',von:'17:00',bis:'18:30'}
+  ];
+  var NOW='11:32';
+  function m(t){var p=t.split(':');return (+p[0])*60+(+p[1]);}
+  function hhmm(x){var h=Math.floor(x/60),mn=x%60;return h+':'+(mn<10?'0':'')+mn;}
+  function mealOf(t){var x=m(t);for(var i=0;i<MAHL.length;i++){if(x>=m(MAHL[i].von)&&x<m(MAHL[i].bis))return MAHL[i];}return null;}
+
+  /* ---- A: Zeitstrahl ---- */
+  (function(){
+    var START=7*60, END=18.75*60, PX=0.95;
+    function y(min){return (min-START)*PX;}
+    var box=document.getElementById('cA');
+    box.style.height=((END-START)*PX)+'px';
+    var html='';
+    for(var h=7;h<=18;h++){ html+='<div class="hour" style="top:'+y(h*60)+'px">'+h+'</div>'
+      +'<div class="grid" style="top:'+y(h*60)+'px"></div>'; }
+    MAHL.forEach(function(M){var t=y(m(M.von)),hh=(m(M.bis)-m(M.von))*PX;
+      html+='<div class="band" style="top:'+t+'px;height:'+hh+'px"><span class="bl">🍽 '+M.name+'</span></div>';});
+    TERMINE.forEach(function(T){var hit=mealOf(T.zeit);
+      html+='<div class="tcard'+(hit?' hit':'')+'" style="top:'+y(m(T.zeit))+'px">'
+        +'<div class="tt">'+T.zeit+'</div><div class="tn">'+T.name+'</div>'
+        +(hit?'<div class="tf">🍽 im '+hit.name+' (bis '+hit.bis.replace(':','')+' Uhr)</div>':'')+'</div>';});
+    var ny=y(m(NOW));
+    html+='<div class="nowdot" style="top:'+ny+'px"></div>'
+      +'<div class="nowline" style="top:'+ny+'px"><span class="nb">jetzt '+NOW+'</span></div>';
+    box.innerHTML=html;
+  })();
+
+  /* ---- B: Fokuskarte ---- */
+  (function(){
+    var now=m(NOW), started=null, next=null;
+    TERMINE.forEach(function(T){var x=m(T.zeit); if(x<=now)started=T; if(x>now&&!next)next=T;});
+    var meal=mealOf(NOW);
+    var box=document.getElementById('cB'), h='<div class="clk">🕛 '+NOW+'</div>';
+    h+='<div class="row"><span class="lab">Jetzt</span><span>'+(started?started.name:'—')+'</span>'
+      +(started?' <span class="pill live">läuft</span>':'')+'</div>';
+    if(meal) h+='<div class="row"><span class="lab">Essen</span><span>'+meal.name
+      +'</span> <span class="pill meal">läuft, bis '+meal.bis+' Uhr</span></div>';
+    if(next){var d=m(next.zeit)-now;h+='<div class="row"><span class="lab">Als Nächstes</span><span>'
+      +next.zeit+' '+next.name+'</span> <span class="pill next">in '+Math.floor(d/60)+' h '+(d%60)+'</span></div>';}
+    box.innerHTML=h;
+  })();
+
+  /* ---- C: Wann essen? ---- */
+  (function(){
+    var box=document.getElementById('cC'),h='';
+    MAHL.forEach(function(M){
+      var koll=TERMINE.filter(function(T){var x=m(T.zeit);return x>=m(M.von)&&x<m(M.bis);});
+      var tip,cls;
+      if(!koll.length){tip='frei: '+M.von+'–'+M.bis+' Uhr, kein Termin.';cls='ok';}
+      else{
+        var nachher=TERMINE.filter(function(T){return m(T.zeit)>=m(M.bis);}).sort(function(a,b){return m(a.zeit)-m(b.zeit);})[0];
+        tip=koll[0].zeit+'-Termin liegt drin. '
+          +(nachher?'Tipp: danach essen, '+M.bis+'–'+nachher.zeit+' Uhr frei.':'Tipp: danach essen, ab '+M.bis+' Uhr.');
+        cls='tight';
+      }
+      h+='<div class="line"><div class="mn">'+M.name+'<small>'+M.von+'–'+M.bis+'</small></div>'
+        +'<div class="tip '+cls+'">'+tip+'</div></div>';
+    });
+    box.innerHTML=h;
+  })();
+
+  /* ---- D: Ampel je Termin ---- */
+  (function(){
+    var now=m(NOW),box=document.getElementById('cD'),h='';
+    TERMINE.forEach(function(T){
+      var hit=mealOf(T.zeit), running=(m(T.zeit)<=now && (TERMINE.filter(function(x){return m(x.zeit)<=now;}).pop()===T));
+      h+='<div class="ap"><div class="t">'+T.zeit+'</div><div><div class="nm">'+T.name+'</div>'
+        +'<div class="rm">📍 '+T.raum+'</div>'
+        +(hit?'<div class="meal-tag"><span class="fork">🍴</span> '+hit.name+' (bis '+hit.bis+' Uhr)'
+          +(running?' · läuft gerade':'')+'</div>':'')
+        +'</div></div>';
+    });
+    box.innerHTML=h;
+  })();
+
+  /* ---- E: Ribbon ---- */
+  (function(){
+    var START=7*60,END=18.75*60,SP=END-START;
+    function p(min){return ((min-START)/SP*100);}
+    var box=document.getElementById('cE'),h='';
+    MAHL.forEach(function(M){h+='<div class="mseg" style="left:'+p(m(M.von))+'%;width:'+((m(M.bis)-m(M.von))/SP*100)+'%"></div>';});
+    TERMINE.forEach(function(T){h+='<div class="rdot" style="left:'+p(m(T.zeit))+'%"></div>';});
+    h+='<div class="rnow" style="left:'+p(m(NOW))+'%"></div>';
+    box.innerHTML=h;
+    var t='',hrs=[8,10,12,14,16,18];hrs.forEach(function(H){t+='<span style="left:'+p(H*60)+'%">'+H+'</span>';});
+    document.getElementById('cEt').innerHTML=t;
+  })();
+</script>
+</body>
+</html>

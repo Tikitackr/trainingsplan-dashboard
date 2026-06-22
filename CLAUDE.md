@@ -72,6 +72,21 @@ Dann:
   sie NICHT — nur „Verlauf und Websitedaten löschen" (iOS Safari komplett) würde
   sie löschen. Darum nie zum Aktualisieren die Websitedaten löschen.
 
+## Heute-Karte (Uhr + Zeitband) & Essenszeiten
+Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
+- **Am heutigen Tag** voll: Live-Uhr (Minutentakt via `setInterval`), „jetzt"-
+  Termin, Essens-Status („Mittag bis 12:45"), „Als Nächstes … in X h Y", plus
+  Zeitband mit Essens-Segmenten, Termin-Punkten (in Trakt-Bereichsfarben) und
+  „jetzt"-Linie.
+- **An anderen Tagen** nur das Zeitband als „Tagesüberblick" (keine Uhr/jetzt).
+- **Essenszeiten** stehen in `plan.json` unter `meta.essenszeiten` (`werktag` und
+  `wochenende`), gespiegelt im `PLAN_DEFAULT`. Sa/So nutzt den Wochenend-Satz
+  (Feiertage werden technisch wie Wochenende behandelt). Ändern sich die
+  Essenszeiten, hier anpassen (beide Stellen synchron). Fallback `ESSEN_DEFAULT`
+  im Code greift, falls das Feld fehlt.
+- Kollision = Termin-Startzeit liegt in einem Essensfenster (Termine haben keine
+  Dauer). Das Zeitband zeigt die Überschneidung optisch.
+
 ## Orientierungskarte (automatisch gezeichnet, SVG)
 Es gibt **keine Bild-Pläne mehr**. Der Raum-Button öffnet eine schematische
 Klinik-Karte im Dashboard-Stil, die per JavaScript gezeichnet wird (Funktion
