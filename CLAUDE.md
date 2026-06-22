@@ -21,6 +21,7 @@ kein Internet/keine Abhängigkeiten) im Liquid-Glass-Stil.
 - Raum-Button pro Termin → öffnet eine **automatisch gezeichnete
   Orientierungskarte** (SVG) als Vollbild-Overlay: der Ziel-Trakt leuchtet.
 - Hell/Dunkel-Umschalter, Fortschrittsanzeige pro Tag.
+- Belohnungs-Effekte: Konfetti beim Abhaken, Feuerwerk + Toast bei komplettem Tag.
 
 ## WICHTIG: Privatsphäre (Repo ist öffentlich!)
 Es dürfen **nur** Zeit, Leistung und Raum rein. NIE in die Datei / ins Repo:
@@ -112,6 +113,14 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
   im Code greift, falls das Feld fehlt.
 - Kollision = Termin-Startzeit liegt in einem Essensfenster (Termine haben keine
   Dauer). Das Zeitband zeigt die Überschneidung optisch.
+
+## Belohnungs-Effekte (Konfetti + Feuerwerk)
+Canvas-Overlay `#fx` + Partikel-Engine inline in `index.html` (keine Library). Konfetti
+(`confettiRain()`) feuert im Karten-Klick-Handler beim Abhaken; das Feuerwerk
+(`dayFireworks()`) bei Übergang offen→komplett (Vorher/Nachher-Vergleich von `dayDone()`).
+`prefers-reduced-motion: reduce` schaltet die Partikel ab (`REDUCE`-Flag) und ersetzt sie
+durch ein kurzes Aufleuchten der Karte; der „Tag geschafft"-Toast bleibt. Intensität/Farben
+über `FXCOL`, `confettiRain`/`firework`-Parameter; Partikel-Deckel `MAX_PARTS`.
 
 ## Orientierungskarte (automatisch gezeichnet, SVG)
 Es gibt **keine Bild-Pläne mehr**. Der Raum-Button öffnet eine schematische
