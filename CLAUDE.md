@@ -118,9 +118,10 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
 Canvas-Overlay `#fx` + Partikel-Engine inline in `index.html` (keine Library). Konfetti
 (`confettiRain()`) feuert im Karten-Klick-Handler beim Abhaken; das Feuerwerk
 (`dayFireworks()`) bei Übergang offen→komplett (Vorher/Nachher-Vergleich von `dayDone()`).
-`prefers-reduced-motion: reduce` schaltet die Partikel ab (`REDUCE`-Flag) und ersetzt sie
-durch ein kurzes Aufleuchten der Karte; der „Tag geschafft"-Toast bleibt. Intensität/Farben
-über `FXCOL`, `confettiRain`/`firework`-Parameter; Partikel-Deckel `MAX_PARTS`.
+Die Effekte laufen **bewusst immer**, auch bei „Bewegung reduzieren" — ausdrücklicher
+Wunsch des Nutzers (vorher gab es eine `prefers-reduced-motion`-Sperre, am 2026-06-23
+entfernt, weil sie auf dem iPhone die Effekte unterdrückte). Intensität/Farben über `FXCOL`,
+`confettiRain`/`firework`-Parameter; Partikel-Deckel `MAX_PARTS`.
 
 ## Orientierungskarte (automatisch gezeichnet, SVG)
 Es gibt **keine Bild-Pläne mehr**. Der Raum-Button öffnet eine schematische

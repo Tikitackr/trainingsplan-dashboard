@@ -16,7 +16,7 @@ Eine self-contained `index.html` — kein Build, keine Abhängigkeiten.
 - Raum antippen → automatisch gezeichnete Orientierungskarte (Ziel-Trakt leuchtet)
 - Hell/Dunkel-Umschalter, Fortschritt pro Tag
 - Belohnungs-Effekte: Konfetti beim Abhaken eines Termins, Feuerwerk + „Tag geschafft"-
-  Einblendung bei komplettem Tag (respektiert „Bewegung reduzieren")
+  Einblendung bei komplettem Tag
 
 ## Aktualisieren
 Live-Termine stehen in `plan.json` (wird Cache-sicher frisch geladen);

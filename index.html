@@ -276,8 +276,6 @@
     box-shadow: 0 8px 30px rgba(0,0,0,.4); pointer-events: none; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  @keyframes tp-flash { 0% { box-shadow: 0 0 0 0 rgba(110,168,254,0); } 30% { box-shadow: 0 0 0 3px rgba(110,168,254,.55); } 100% { box-shadow: 0 0 0 0 rgba(110,168,254,0); } }
-  .appt.flash { animation: tp-flash .6s ease-out; }
 </style>
 </head>
 <body data-page="trainingsplan">
@@ -572,10 +570,7 @@ var PLAN_DEFAULT = {
         var now = store.get(k) !== '1';
         store.set(k, now ? '1' : '0');
         card.classList.toggle('done', now);
-        if (now){
-          if (REDUCE){ card.classList.add('flash'); setTimeout(function(){ card.classList.remove('flash'); }, 650); }
-          else confettiRain();
-        }
+        if (now) confettiRain();
         updateProgress();
         renderTodayCard();
         updateTodayStates();
@@ -807,7 +802,7 @@ var PLAN_DEFAULT = {
   }, 30000);
 
   // ---- Belohnungs-Effekte: Canvas-Partikel-Engine ----
-  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Effekte laufen bewusst IMMER — auch bei „Bewegung reduzieren" (Wunsch des Nutzers).
   var fxCv = document.getElementById('fx'), fxCtx = fxCv.getContext('2d');
   var FXDPR = Math.min(2, window.devicePixelRatio || 1);
   function fxSize(){ fxCv.width = innerWidth * FXDPR; fxCv.height = innerHeight * FXDPR; fxCtx.setTransform(FXDPR,0,0,FXDPR,0,0); }
@@ -830,7 +825,6 @@ var PLAN_DEFAULT = {
   }
   function run(){ if (!fxOn){ fxOn = true; requestAnimationFrame(fxTick); } }
   function confettiRain(){
-    if (REDUCE) return;
     var n = Math.min(140, MAX_PARTS - parts.length);
     for (var i = 0; i < n; i++){
       parts.push({ x: Math.random()*innerWidth, y: -20 - Math.random()*innerHeight*0.5,
@@ -841,7 +835,6 @@ var PLAN_DEFAULT = {
     run();
   }
   function firework(x, y){
-    if (REDUCE) return;
     var n = Math.min(70, MAX_PARTS - parts.length), base = fxColor();
     for (var i = 0; i < n; i++){
       var ang = (i / n) * Math.PI * 2, sp = 3.5 + Math.random()*2;
@@ -857,7 +850,6 @@ var PLAN_DEFAULT = {
   }
   function dayFireworks(){
     celebrateToast();
-    if (REDUCE) return;
     var shots = [[0.25,0.30],[0.55,0.20],[0.78,0.35],[0.40,0.18],[0.66,0.40]];
     shots.forEach(function(s, k){
       setTimeout(function(){ firework(innerWidth*s[0], innerHeight*s[1]); }, k*340);
