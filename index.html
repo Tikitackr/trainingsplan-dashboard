@@ -205,6 +205,13 @@
   .appt.done .time { font-size: 15px; margin-right: 7px; }
   .appt.done .name { font-size: 14px; }
 
+  /* „als Nächstes dran" — der nächste offene Termin am heutigen Tag */
+  .appt.next { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 8px 24px rgba(0,0,0,.18), inset 0 1px 0 var(--glass-edge); }
+  .appt.next .time { color: var(--accent); }
+  .appt.next .name::after { content: "als Nächstes"; display: inline-block; margin-left: 8px;
+    font-size: 11px; font-weight: 700; color: var(--accent); border: 1px solid var(--accent);
+    border-radius: 999px; padding: 1px 7px; vertical-align: middle; }
+
   .empty { text-align: center; color: var(--muted); padding: 48px 16px; font-style: italic; }
 
   footer { margin-top: 26px; padding: 14px 4px; color: var(--muted); font-size: 12px; text-align: center; }
@@ -494,6 +501,7 @@ var PLAN_DEFAULT = {
       var k = key(tag.datum, t.zeit, t.name);
       var done = store.get(k) === '1';
       var card = el('div', 'appt' + (done ? ' done' : ''));
+      card.setAttribute('data-k', k);
 
       var check = el('div', 'check'); check.innerHTML = CHECK;
       var body = el('div', 'body');
@@ -515,10 +523,31 @@ var PLAN_DEFAULT = {
         card.classList.toggle('done', now);
         updateProgress();
         renderTodayCard();
+        updateNextHighlight();
       });
       listEl.appendChild(card);
     });
     updateProgress();
+    updateNextHighlight();
+  }
+
+  // Punkt 4: nächster offener Termin am heutigen Tag = „als Nächstes dran".
+  function nextKeyToday(){
+    var tag = DAYS[active];
+    if (!tag || tag.datum !== todayISO()) return null;
+    var now = nowMin();
+    for (var i = 0; i < tag.termine.length; i++){
+      var t = tag.termine[i];
+      if (toMin(t.zeit) > now && store.get(key(tag.datum, t.zeit, t.name)) !== '1') return key(tag.datum, t.zeit, t.name);
+    }
+    return null;
+  }
+  function updateNextHighlight(){
+    var nk = nextKeyToday();
+    var cards = listEl.querySelectorAll('.appt');
+    for (var i = 0; i < cards.length; i++){
+      cards[i].classList.toggle('next', !!nk && cards[i].getAttribute('data-k') === nk);
+    }
   }
 
   // Grundriss-Overlay
@@ -646,7 +675,9 @@ var PLAN_DEFAULT = {
   function applyPlan(plan){
     if (!planValid(plan)) return;
     PLAN = plan;
-    weeklabel.textContent = (PLAN.meta && PLAN.meta.woche) || '';
+    var _st = (PLAN.meta && PLAN.meta.stand) || '', _stTxt = '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(_st)){ var _p = _st.split('-'); _stTxt = ' · Stand ' + _p[2] + '.' + _p[1] + '.'; }
+    weeklabel.textContent = ((PLAN.meta && PLAN.meta.woche) || '') + _stTxt;
     footer.innerHTML = 'Stand ' + ((PLAN.meta && PLAN.meta.stand) || '')
       + (PLAN.meta && PLAN.meta.quelle ? ' · ' + PLAN.meta.quelle : '')
       + ' · Häkchen werden auf diesem Gerät gespeichert.';
@@ -694,7 +725,7 @@ var PLAN_DEFAULT = {
   //    minütlich auffrischen (Uhr, „jetzt"-Linie, Jetzt/Nächstes).
   setInterval(function(){
     var tag = DAYS[active];
-    if (tag && tag.datum === todayISO()) renderTodayCard();
+    if (tag && tag.datum === todayISO()){ renderTodayCard(); updateNextHighlight(); }
   }, 30000);
 })();
 </script>
