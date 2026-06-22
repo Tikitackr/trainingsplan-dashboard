@@ -1,6 +1,9 @@
 # macOS
 .DS_Store
 
+# Visueller Brainstorming-Begleiter (lokale Mockups)
+.superpowers/
+
 # Quell-Scans mit PRIVATDATEN — NIE ins öffentliche Repo
 Eingang/
 Ablage/
