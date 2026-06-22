@@ -455,16 +455,28 @@ var PLAN_DEFAULT = {
     function px(x){ return Math.max(0, Math.min(100, (x - START) / SP * 100)); }
     var h = '';
     if (isToday){
-      var now = nowMin(), started = null, next = null;
-      tag.termine.forEach(function(t){ var x = toMin(t.zeit); if (x <= now) started = t; if (x > now && !next) next = t; });
+      var now = nowMin(), running = null, next = null, anyOpen = false, curIdx = -1;
+      for (var ci = 0; ci < tag.termine.length; ci++){
+        var ti = tag.termine[ci], offen = store.get(key(tag.datum, ti.zeit, ti.name)) !== '1';
+        if (offen) anyOpen = true;
+        if (toMin(ti.zeit) <= now) curIdx = ci;                       // aktueller Slot (letzter gestarteter)
+        if (toMin(ti.zeit) > now && offen && !next) next = ti;        // nächster offener Termin
+      }
+      if (curIdx >= 0){                                               // läuft gerade ein offener Termin?
+        var cur = tag.termine[curIdx];
+        var slotEnd = (curIdx + 1 < tag.termine.length) ? toMin(tag.termine[curIdx + 1].zeit) : toMin(cur.zeit) + 90;
+        if (now < slotEnd && store.get(key(tag.datum, cur.zeit, cur.name)) !== '1') running = cur;
+      }
+      function nxLine(t){ var d = toMin(t.zeit) - now; return t.zeit + ' ' + escHtml(t.name) + ' · in ' + Math.floor(d/60) + ' h ' + (d%60); }
       var meal = mealAt(now, set);
       h += '<div class="thead"><div class="clock">' + fmtMin(now) + '<small>heute</small></div><div class="lines">';
-      if (started) h += '<div><span class="pill live">jetzt</span> ' + escHtml(started.name) + '</div>';
-      else if (tag.termine.length) h += '<div>Gleich: ' + tag.termine[0].zeit + ' ' + escHtml(tag.termine[0].name) + '</div>';
+      if (running) h += '<div><span class="pill live">jetzt</span> ' + escHtml(running.name) + '</div>';
+      else if (next) h += '<div>Als Nächstes: ' + nxLine(next) + '</div>';
+      else if (tag.termine.length && !anyOpen) h += '<div>Alle Termine erledigt ✓</div>';
+      else if (tag.termine.length) h += '<div>Keine weiteren Termine heute</div>';
       else h += '<div>Keine Termine heute</div>';
       if (meal) h += '<div><span class="pill meal">' + escHtml(meal.name) + ' bis ' + meal.bis + ' Uhr</span></div>';
-      if (next){ var d = toMin(next.zeit) - now; h += '<div class="nx">Als Nächstes: ' + next.zeit + ' ' + escHtml(next.name) + ' · in ' + Math.floor(d/60) + ' h ' + (d%60) + '</div>'; }
-      else if (tag.termine.length) h += '<div class="nx">Keine weiteren Termine heute</div>';
+      if (running && next) h += '<div class="nx">Als Nächstes: ' + nxLine(next) + '</div>';
       h += '</div></div>';
     } else {
       h += '<div class="rcap">' + (DOW_LANG[tag.dow] || tag.dow) + ' · Tagesüberblick</div>';

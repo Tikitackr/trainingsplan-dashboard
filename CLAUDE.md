@@ -79,6 +79,11 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
   Zeitband mit Essens-Segmenten, Termin-Punkten (in Trakt-Bereichsfarben) und
   „jetzt"-Linie.
 - **An anderen Tagen** nur das Zeitband als „Tagesüberblick" (keine Uhr/jetzt).
+- **„jetzt"-Logik (Slot-Modell):** „jetzt" zeigt nur den *aktuell laufenden, noch
+  offenen* Termin — laufend = von seiner Startzeit bis zum nächsten Termin (beim
+  letzten Termin +90 Min). Abgehakte Termine erscheinen NIE als „jetzt"; läuft
+  gerade nichts, rückt „Als Nächstes" als Hauptzeile vor, sind alle erledigt steht
+  „Alle Termine erledigt ✓".
 - **„als Nächstes dran":** Am heutigen Tag bekommt der nächste *noch offene* Termin
   in der Liste einen Akzent-Rahmen + „als Nächstes"-Pill (`.appt.next`). Auswahl
   via `nextKeyToday()` (erster Termin mit Zeit > jetzt und nicht abgehakt),
