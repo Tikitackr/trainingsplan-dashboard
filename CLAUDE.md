@@ -79,6 +79,13 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
   Zeitband mit Essens-Segmenten, Termin-Punkten (in Trakt-Bereichsfarben) und
   „jetzt"-Linie.
 - **An anderen Tagen** nur das Zeitband als „Tagesüberblick" (keine Uhr/jetzt).
+- **Erledigte Termine im Zeitband:** ein abgehakter Termin erscheint als
+  *gedimmter, hohler Ring* in Trakt-Farbe statt als vollem Punkt (offene Termine
+  bleiben voll). Bewusst NICHT ganz ausgeblendet, damit der Tagesüberblick (Form
+  des Tages, „jetzt"-Linie im Verhältnis) erhalten bleibt. Steuerung: Done-Check
+  via `key()`/`store` in `renderTodayCard`, Optik über CSS `.rdot.done`
+  (`opacity` dort anpassen, falls zu blass/kräftig). Abhaken in der Liste ruft
+  `renderTodayCard()` → der Ring reagiert sofort.
 - **Essenszeiten** stehen in `plan.json` unter `meta.essenszeiten` (`werktag` und
   `wochenende`), gespiegelt im `PLAN_DEFAULT`. Sa/So nutzt den Wochenend-Satz
   (Feiertage werden technisch wie Wochenende behandelt). Ändern sich die

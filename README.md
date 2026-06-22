@@ -8,6 +8,9 @@ Eine self-contained `index.html` — kein Build, keine Abhängigkeiten.
 ## Funktionen
 - Tag-Umschalter, aktueller Tag automatisch vorgewählt
 - Termine abhaken → durchgestrichen, Zustand bleibt (localStorage)
+- Heute-Karte mit Live-Uhr, laufendem/nächstem Termin, Essens-Status und
+  Zeitband (Tagesüberblick); erledigte Termine erscheinen im Zeitband als
+  gedimmter Ring, offene als voller Punkt
 - Raum antippen → automatisch gezeichnete Orientierungskarte (Ziel-Trakt leuchtet)
 - Hell/Dunkel-Umschalter, Fortschritt pro Tag
 
