@@ -155,6 +155,7 @@
     border-left: 1px solid rgba(233,162,59,.55); border-right: 1px solid rgba(233,162,59,.55); }
   .today .ribbon .rdot { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
     transform: translate(-50%,-50%); border: 2px solid var(--bg-1); }
+  .today .ribbon .rdot.done { background: transparent; opacity: 0.4; }
   .today .ribbon .rnow { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text); }
   .today .rticks { position: relative; height: 13px; margin-top: 3px; color: var(--muted); font-size: 10px; }
   .today .rticks span { position: absolute; transform: translateX(-50%); }
@@ -457,7 +458,9 @@ var PLAN_DEFAULT = {
     set.forEach(function(M){ h += '<div class="mseg" style="left:' + px(toMin(M.von)) + '%;width:' + ((toMin(M.bis)-toMin(M.von))/SP*100) + '%"></div>'; });
     tag.termine.forEach(function(t){
       var tr = parseTrakt(t.raum); var col = tr ? ('var(--' + tr.toLowerCase() + ')') : 'var(--accent)';
-      h += '<div class="rdot" style="left:' + px(toMin(t.zeit)) + '%;background:' + col + '"></div>';
+      var done = store.get(key(tag.datum, t.zeit, t.name)) === '1';
+      if (done) h += '<div class="rdot done" style="left:' + px(toMin(t.zeit)) + '%;border-color:' + col + '"></div>';
+      else h += '<div class="rdot" style="left:' + px(toMin(t.zeit)) + '%;background:' + col + '"></div>';
     });
     if (isToday){ var nm = nowMin(); if (nm >= START && nm <= END) h += '<div class="rnow" style="left:' + px(nm) + '%"></div>'; }
     h += '</div><div class="rticks">';
@@ -502,6 +505,7 @@ var PLAN_DEFAULT = {
         store.set(k, now ? '1' : '0');
         card.classList.toggle('done', now);
         updateProgress();
+        renderTodayCard();
       });
       listEl.appendChild(card);
     });
