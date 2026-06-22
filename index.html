@@ -565,6 +565,7 @@ var PLAN_DEFAULT = {
 
       card.appendChild(check); card.appendChild(body);
       card.addEventListener('click', function(){
+        var wasDone = dayDone(tag);
         var now = store.get(k) !== '1';
         store.set(k, now ? '1' : '0');
         card.classList.toggle('done', now);
@@ -572,6 +573,7 @@ var PLAN_DEFAULT = {
         updateProgress();
         renderTodayCard();
         updateTodayStates();
+        if (now && !wasDone && dayDone(tag)) dayFireworks();
       });
       listEl.appendChild(card);
     });
@@ -846,6 +848,14 @@ var PLAN_DEFAULT = {
   function celebrateToast(){
     var t = document.getElementById('celebrate'); if (!t) return;
     t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+  function dayFireworks(){
+    celebrateToast();
+    if (REDUCE) return;
+    var shots = [[0.25,0.30],[0.55,0.20],[0.78,0.35],[0.40,0.18],[0.66,0.40]];
+    shots.forEach(function(s, k){
+      setTimeout(function(){ firework(innerWidth*s[0], innerHeight*s[1]); }, k*340);
+    });
   }
 })();
 </script>
