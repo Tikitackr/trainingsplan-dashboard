@@ -21,7 +21,7 @@ kein Internet/keine Abhängigkeiten) im Liquid-Glass-Stil.
 - Raum-Button pro Termin → öffnet eine **automatisch gezeichnete
   Orientierungskarte** (SVG) als Vollbild-Overlay: der Ziel-Trakt leuchtet.
 - Hell/Dunkel-Umschalter, Fortschrittsanzeige pro Tag.
-- Belohnungs-Effekte: Konfetti beim Abhaken, Feuerwerk + Toast bei komplettem Tag.
+- Belohnungs-Effekte: Konfetti beim Abhaken, Feuerwerk bei komplettem Tag (keine Text-Einblendung, keine Icons/Emojis).
 
 ## WICHTIG: Privatsphäre (Repo ist öffentlich!)
 Es dürfen **nur** Zeit, Leistung und Raum rein. NIE in die Datei / ins Repo:
@@ -122,6 +122,12 @@ Die Effekte laufen **bewusst immer**, auch bei „Bewegung reduzieren" — ausdr
 Wunsch des Nutzers (vorher gab es eine `prefers-reduced-motion`-Sperre, am 2026-06-23
 entfernt, weil sie auf dem iPhone die Effekte unterdrückte). Intensität/Farben über `FXCOL`,
 `confettiRain`/`firework`-Parameter; Partikel-Deckel `MAX_PARTS`.
+
+**Keine Text-Einblendung, keine Icons/Emojis.** Es gab kurzzeitig einen „🎉 Tag
+geschafft"-Toast — am 2026-06-23 ersatzlos entfernt. Generelle Designregel für dieses
+Dashboard: durchgängig iOS-Look (Vibrancy/Blur, System-Typografie), **niemals
+Emojis oder dekorative Icons**. Erfolg/Status rein über Effekte und klaren Text.
+(Das funktionale „erledigt"-Häkchen `✓` an Tab/Liste ist Zustand, kein Deko-Icon.)
 
 ## Orientierungskarte (automatisch gezeichnet, SVG)
 Es gibt **keine Bild-Pläne mehr**. Der Raum-Button öffnet eine schematische
