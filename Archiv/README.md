@@ -10,6 +10,12 @@ die aber als Referenz/Vorlage aufbewahrt werden.
   hinterlegt.
 - `grundriss-ebenen.jpg` — abfotografierter **Wegweiser** (die drei Ebenen
   E1 · E0 · E−1). Ebenfalls bis 2026-06-20 als Overlay hinterlegt.
+- `Mockups/` — Design-Spielwiesen, mit denen Layout-Varianten vor dem Einbau
+  ins Dashboard durchprobiert wurden (am 2026-06-22 hierher verschoben, nachdem
+  die finalen Varianten in `index.html` live und mobil getestet waren):
+  - `mockup-karte.html` — Orientierungskarte (Vorlage für das Inline-SVG `mapSVG`).
+  - `mockup-essenszeiten.html` / `mockup-heute.html` / `mockup-heute-vergleich.html`
+    — Konzepte für Heute-Karte + Essenszeiten (gewählt wurde B+E).
 
 ## Warum archiviert?
 

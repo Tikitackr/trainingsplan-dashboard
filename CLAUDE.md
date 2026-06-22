@@ -104,7 +104,7 @@ Haupteingang sind fest eingezeichnet. Darunter Ebenen-Pille + Ziel-Chip + Text.
 
 **Karten-Geometrie ändern** (nur wenn ein Trakt umziehen muss): im Array
 `var TRAKTE = [ … ]` die Koordinaten anpassen. Anordnung folgt der Vorlage
-(Lageplan/Wegweiser, archiviert in `Archiv/`). Spielwiese: `mockup-karte.html`.
+(Lageplan/Wegweiser, archiviert in `Archiv/`). Spielwiese: `Archiv/Mockups/mockup-karte.html`.
 
 ## Räume aus dem ersten Ausdruck (Trakt → Ebene → Bereich)
 - Trakt E/E0 · Therapiebereich 3 · Sporthalle
