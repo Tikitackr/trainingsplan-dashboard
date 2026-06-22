@@ -268,9 +268,21 @@
   @keyframes tp-pulse { 0%{ r:13; opacity:.55 } 70%{ r:30; opacity:0 } 100%{ opacity:0 } }
   .mapcard .pulse { animation: tp-pulse 2.4s ease-out infinite; transform-origin: center; }
   @media (prefers-reduced-motion: reduce){ .mapcard .pulse{ animation: none; opacity: 0 } }
+  #fx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 90; }
+  .toast { position: fixed; left: 50%; top: 16%; transform: translateX(-50%) translateY(-12px);
+    background: rgba(20,28,52,.92); border: 1px solid var(--stroke, rgba(255,255,255,.12));
+    color: #fff; padding: 11px 18px; border-radius: 999px; font-weight: 600; font-size: 15px;
+    z-index: 95; opacity: 0; transition: .3s; backdrop-filter: blur(10px);
+    box-shadow: 0 8px 30px rgba(0,0,0,.4); pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @keyframes tp-flash { 0% { box-shadow: 0 0 0 0 rgba(110,168,254,0); } 30% { box-shadow: 0 0 0 3px rgba(110,168,254,.55); } 100% { box-shadow: 0 0 0 0 rgba(110,168,254,0); } }
+  .appt.flash { animation: tp-flash .6s ease-out; }
 </style>
 </head>
 <body data-page="trainingsplan">
+  <canvas id="fx"></canvas>
+  <div class="toast" id="celebrate">🎉 Tag geschafft!</div>
   <div class="wrap">
     <div class="header">
       <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2v4M16 2v4M8.5 14l2 2 4-4"/></svg></span>
@@ -556,12 +568,18 @@ var PLAN_DEFAULT = {
 
       card.appendChild(check); card.appendChild(body);
       card.addEventListener('click', function(){
+        var wasDone = dayDone(tag);
         var now = store.get(k) !== '1';
         store.set(k, now ? '1' : '0');
         card.classList.toggle('done', now);
+        if (now){
+          if (REDUCE){ card.classList.add('flash'); setTimeout(function(){ card.classList.remove('flash'); }, 650); }
+          else confettiRain();
+        }
         updateProgress();
         renderTodayCard();
         updateTodayStates();
+        if (now && !wasDone && dayDone(tag)) dayFireworks();
       });
       listEl.appendChild(card);
     });
@@ -787,6 +805,64 @@ var PLAN_DEFAULT = {
     var tag = DAYS[active];
     if (tag && tag.datum === todayISO()){ renderTodayCard(); updateTodayStates(); }
   }, 30000);
+
+  // ---- Belohnungs-Effekte: Canvas-Partikel-Engine ----
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fxCv = document.getElementById('fx'), fxCtx = fxCv.getContext('2d');
+  var FXDPR = Math.min(2, window.devicePixelRatio || 1);
+  function fxSize(){ fxCv.width = innerWidth * FXDPR; fxCv.height = innerHeight * FXDPR; fxCtx.setTransform(FXDPR,0,0,FXDPR,0,0); }
+  fxSize(); window.addEventListener('resize', fxSize);
+  var parts = [], fxOn = false, MAX_PARTS = 400;
+  var FXCOL = ['#6ea8fe','#a78bfa','#34d399','#fbbf24','#f472b6','#22d3ee'];
+  function fxColor(){ return FXCOL[Math.floor(Math.random() * FXCOL.length)]; }
+  function fxTick(){
+    fxCtx.clearRect(0,0,innerWidth,innerHeight);
+    for (var i = parts.length - 1; i >= 0; i--){
+      var p = parts[i];
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.life--; p.rot += p.vr;
+      fxCtx.globalAlpha = Math.max(0, Math.min(1, p.life / p.fade));
+      if (p.kind === 'spark'){ fxCtx.fillStyle = p.c; fxCtx.beginPath(); fxCtx.arc(p.x, p.y, p.r, 0, 7); fxCtx.fill(); }
+      else { fxCtx.save(); fxCtx.translate(p.x, p.y); fxCtx.rotate(p.rot); fxCtx.fillStyle = p.c; fxCtx.fillRect(-p.r, -p.r*0.6, p.r*2, p.r*1.2); fxCtx.restore(); }
+      if (p.life <= 0 || p.y > innerHeight + 40) parts.splice(i, 1);
+    }
+    fxCtx.globalAlpha = 1;
+    if (parts.length){ requestAnimationFrame(fxTick); } else { fxOn = false; fxCtx.clearRect(0,0,innerWidth,innerHeight); }
+  }
+  function run(){ if (!fxOn){ fxOn = true; requestAnimationFrame(fxTick); } }
+  function confettiRain(){
+    if (REDUCE) return;
+    var n = Math.min(140, MAX_PARTS - parts.length);
+    for (var i = 0; i < n; i++){
+      parts.push({ x: Math.random()*innerWidth, y: -20 - Math.random()*innerHeight*0.5,
+        vx: (Math.random()-0.5)*1.5, vy: 2 + Math.random()*3, g: 0.05,
+        r: 3 + Math.random()*4, c: fxColor(), life: 120, fade: 90,
+        rot: Math.random()*7, vr: (Math.random()-0.5)*0.5, kind: 'conf' });
+    }
+    run();
+  }
+  function firework(x, y){
+    if (REDUCE) return;
+    var n = Math.min(70, MAX_PARTS - parts.length), base = fxColor();
+    for (var i = 0; i < n; i++){
+      var ang = (i / n) * Math.PI * 2, sp = 3.5 + Math.random()*2;
+      parts.push({ x: x, y: y, vx: Math.cos(ang)*sp, vy: Math.sin(ang)*sp, g: 0.045,
+        r: 2 + Math.random()*2, c: Math.random() < 0.7 ? base : fxColor(), life: 70, fade: 70,
+        rot: 0, vr: 0, kind: 'spark' });
+    }
+    run();
+  }
+  function celebrateToast(){
+    var t = document.getElementById('celebrate'); if (!t) return;
+    t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 2200);
+  }
+  function dayFireworks(){
+    celebrateToast();
+    if (REDUCE) return;
+    var shots = [[0.25,0.30],[0.55,0.20],[0.78,0.35],[0.40,0.18],[0.66,0.40]];
+    shots.forEach(function(s, k){
+      setTimeout(function(){ firework(innerWidth*s[0], innerHeight*s[1]); }, k*340);
+    });
+  }
 })();
 </script>
 </body>
