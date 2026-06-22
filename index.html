@@ -568,6 +568,7 @@ var PLAN_DEFAULT = {
         var now = store.get(k) !== '1';
         store.set(k, now ? '1' : '0');
         card.classList.toggle('done', now);
+        if (now) confettiRain();
         updateProgress();
         renderTodayCard();
         updateTodayStates();
