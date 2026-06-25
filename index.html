@@ -166,6 +166,25 @@
   .today .rlegend i { font-style: normal; }
   .today .rlegend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: -1px; margin-right: 4px; }
 
+  /* ---- Essens-Chips: exakte Zeiten je Tag; am heutigen Tag leuchtet die laufende Pause ---- */
+  .today .meals { margin-top: 13px; border-top: 1px solid var(--glass-border); padding-top: 12px; }
+  .today .meals .mcap { font-size: 11px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); margin: 0 0 9px; }
+  .today .meals .mrow { display: flex; gap: 8px; }
+  .today .chip { flex: 1 1 0; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px;
+    padding: 8px 9px; text-align: center; transition: background .35s ease, border-color .35s ease, box-shadow .35s ease; }
+  .today .chip .mn { font-size: 11px; color: var(--muted); font-weight: 600; transition: color .35s ease; }
+  .today .chip .mt { font-size: 13px; font-weight: 700; letter-spacing: -.01em; margin-top: 3px; white-space: nowrap; transition: color .35s ease; }
+  .today .chip .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--meal); margin-right: 5px; vertical-align: 1px; transition: box-shadow .35s ease; }
+  .today .chip.active { background: linear-gradient(135deg, rgba(233,162,59,.26), rgba(233,162,59,.13)); border-color: rgba(233,162,59,.6); animation: mealPulse 2.6s ease-in-out infinite; }
+  .today .chip.active .mn { color: var(--text); }
+  .today .chip.active .mt { color: var(--meal); }
+  [data-theme="light"] .today .chip.active .mt { color: #9a5a00; }
+  .today .chip.active .dot { box-shadow: 0 0 7px 1px rgba(233,162,59,.9); }
+  @keyframes mealPulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(233,162,59,.45), 0 4px 14px rgba(233,162,59,.16); }
+    50%      { box-shadow: 0 0 0 1px rgba(233,162,59,.7), 0 7px 22px rgba(233,162,59,.4); }
+  }
+
   /* ---- Termin-Karten ---- */
   .list { display: flex; flex-direction: column; gap: 10px; }
   .appt {
@@ -525,6 +544,18 @@ var PLAN_DEFAULT = {
        + '<i><span class="sw" style="background:var(--accent)"></span>Termin</i>'
        + (isToday ? '<i><span class="sw" style="background:transparent;border:1px solid var(--warn);box-shadow:0 0 0 1px var(--warn)"></span>überfällig</i>' : '')
        + (isToday ? '<i><span class="sw" style="background:var(--text)"></span>jetzt</i>' : '') + '</div>';
+    // Essens-Chips: exakte Von–Bis-Zeiten je Tag (Werktag/Wochenende-Satz). Am heutigen
+    // Tag leuchtet der Chip der gerade laufenden Pause (aktives `meal` aus mealAt oben).
+    var mealCap = (tag.dow === 'Sa' || tag.dow === 'So') ? 'Essenszeiten · Sa/So' : 'Essenszeiten · Mo–Fr';
+    var actMeal = isToday ? meal : null;
+    function hm(s){ return String(s).replace(/^0/, ''); }
+    h += '<div class="meals"><div class="mcap">' + mealCap + '</div><div class="mrow">';
+    set.forEach(function(M){
+      var on = (actMeal && M === actMeal) ? ' active' : '';
+      h += '<div class="chip' + on + '"><div class="mn"><span class="dot"></span>' + escHtml(M.name) + '</div>'
+         + '<div class="mt">' + hm(M.von) + '–' + hm(M.bis) + '</div></div>';
+    });
+    h += '</div></div>';
     todayEl.innerHTML = h;
   }
 
