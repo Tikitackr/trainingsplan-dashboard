@@ -33,7 +33,7 @@
     --shadow: 0 8px 32px rgba(0,0,0,0.45);
     --radius: 18px;
     --ok: #3fb950;
-    --warn: #d29922;
+    --warn: #ff453a;   /* „überfällig" = Alarm-Rot (iOS systemRed, dunkel) */
     --meal: #e9a23b;
     /* Bereichsfarben der Trakte (aus dem Lageplan) — themenunabhängig */
     --a: #f2cf3e; --b: #ef8b3f; --c: #e0533f;
@@ -53,7 +53,7 @@
     --card: rgba(255,255,255,0.78);
     --shadow: 0 8px 30px rgba(40,60,100,0.16);
     --ok: #1a7f37;
-    --warn: #9a6700;
+    --warn: #d70015;   /* „überfällig" = Alarm-Rot (iOS systemRed, hell) */
     --meal: #c77f17;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -146,7 +146,7 @@
   .today .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 7px; vertical-align: middle; }
   .today .pill.live { background: var(--ok); color: #04210d; }
   .today .pill.meal { background: var(--meal); color: #241402; }
-  .today .pill.due { background: var(--warn); color: #241402; }
+  .today .pill.due { background: var(--warn); color: #fff; }
   [data-theme="light"] .today .pill.live { color: #fff; }
   [data-theme="light"] .today .pill.meal { color: #fff; }
   [data-theme="light"] .today .pill.due { color: #fff; }
@@ -158,7 +158,7 @@
   .today .ribbon .rdot { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%;
     transform: translate(-50%,-50%); border: 2px solid var(--bg-1); }
   .today .ribbon .rdot.done { background: transparent; opacity: 0.4; }
-  .today .ribbon .rdot.overdue { background: transparent; border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn), 0 0 7px rgba(210,153,34,.7); }
+  .today .ribbon .rdot.overdue { background: transparent; border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn), 0 0 7px rgba(255,69,58,.7); }
   .today .ribbon .rnow { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text); }
   .today .rticks { position: relative; height: 13px; margin-top: 3px; color: var(--muted); font-size: 10px; }
   .today .rticks span { position: absolute; transform: translateX(-50%); }
@@ -260,7 +260,7 @@
   .appt.overdue .check { border-color: var(--warn); }
   .appt.overdue .time { color: var(--warn); }
   .appt.overdue .name::after { content: "überfällig"; display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700;
-    color: #241402; background: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+    color: #fff; background: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
   [data-theme="light"] .appt.overdue .name::after { color: #fff; }
 
   .empty { text-align: center; color: var(--muted); padding: 48px 16px; font-style: italic; }
