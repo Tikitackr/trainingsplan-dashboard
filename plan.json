@@ -4,6 +4,18 @@
     "essenszeiten": {
       "werktag":    [ {"name":"Frühstück","von":"07:15","bis":"09:00"}, {"name":"Mittag","von":"11:30","bis":"12:45"}, {"name":"Abendessen","von":"17:00","bis":"18:30"} ],
       "wochenende": [ {"name":"Frühstück","von":"07:30","bis":"09:00"}, {"name":"Mittag","von":"11:30","bis":"12:30"}, {"name":"Abendessen","von":"17:00","bis":"18:15"} ]
+    },
+    "speiseplan": {
+      "2026-06-26": { "menu1": "Fischfilet mit Zwiebelkruste an Senfsoße, Frühlingsgemüse und Dillkartoffeln", "vegetarisch": "Sellerieschnitzel auf Champignon-Lauch-Sugo und Kräuterkartoffeln" },
+      "2026-06-27": { "menu1": "„Gaisburger Marsch“ Leichte Gemüsesuppe mit Spätzle", "vegetarisch": "„Gazpacho“ Spanische kalte Gemüsesuppe" },
+      "2026-06-28": { "menu1": "Kalbsgeschnetzeltes mit gemischten Pilzen auf Kräuternudeln", "vegetarisch": "Gemüselasagne" },
+      "2026-06-29": { "menu1": "Spaghetti „Bolognese“", "optional": "Italienische Hackbällchen", "vegetarisch": "Rosmarinkartoffeln mit mediterranem Gemüse und Kräuterdipp" },
+      "2026-06-30": { "menu1": "Puten-Gemüse-Ragout mit Dampfkartoffeln", "vegetarisch": "Pilz-Vollkorn-Bratling an Kräutersoße und Brokkoli" },
+      "2026-07-01": { "menu1": "Rinderbratwurst an Bratensoße, Erbsengemüse und Kartoffelpüree", "optional": "Kabeljaufilet", "vegetarisch": "Indisches Kichererbsen Dal" },
+      "2026-07-02": { "menu1": "Rinderbraten mit Dijonsenfsoße, bunte Möhren und Vollkornpenne", "optional": "Tofu-Gemüse-Spieß auf Gemüsecouscous", "vegetarisch": "Überbackenes Blumenkohlschnitzel auf Gemüsecouscous" },
+      "2026-07-03": { "menu1": "Fischfilet an Salsasoße, Mangoldgemüse und Bandnudeln", "vegetarisch": "Nudel-Gemüse-Auflauf an Petersiliensoße" },
+      "2026-07-04": { "menu1": "„Pichelsteiner Eintopf“ mit Geflügelwurst", "vegetarisch": "Minestrone mit Joghurtklecks" },
+      "2026-07-05": { "menu1": "Rindergeschnetzeltes mit Paprika und Wildreis", "vegetarisch": "Käsespätzle mit Schmorzwiebeln" }
     }
   },
   "tage": [

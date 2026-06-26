@@ -184,6 +184,20 @@
     0%, 100% { box-shadow: 0 0 0 1px rgba(233,162,59,.45), 0 4px 14px rgba(233,162,59,.16); }
     50%      { box-shadow: 0 0 0 1px rgba(233,162,59,.7), 0 7px 22px rgba(233,162,59,.4); }
   }
+  /* Mittags-Chip mit Speiseplan: antippbar */
+  .today .chip.mittag { cursor: pointer; }
+  .today .chip.mittag:active { transform: scale(.97); }
+  .today .chip .tap { display: block; font-size: 9.5px; font-weight: 700; letter-spacing: .02em; color: var(--accent); margin-top: 4px; }
+  .today .chip.active .tap { color: var(--meal); }
+  [data-theme="light"] .today .chip.active .tap { color: #9a5a00; }
+
+  /* ---- Speiseplan: klappt inline in der Heute-Karte auf ---- */
+  .today .menu-inline { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .today .menu-item { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; padding: 9px 11px; }
+  .today .menu-item .ml { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+  .today .menu-item .ml .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 7px; }
+  .today .menu-item .md { font-size: 13.5px; color: var(--text); line-height: 1.35; }
 
   /* ---- Termin-Karten ---- */
   .list { display: flex; flex-direction: column; gap: 10px; }
@@ -358,6 +372,18 @@ var PLAN_DEFAULT = {
     essenszeiten: {
       werktag:    [ {name:"Frühstück",von:"07:15",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:45"}, {name:"Abendessen",von:"17:00",bis:"18:30"} ],
       wochenende: [ {name:"Frühstück",von:"07:30",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:30"}, {name:"Abendessen",von:"17:00",bis:"18:15"} ]
+    },
+    speiseplan: {
+      "2026-06-26": { menu1: "Fischfilet mit Zwiebelkruste an Senfsoße, Frühlingsgemüse und Dillkartoffeln", vegetarisch: "Sellerieschnitzel auf Champignon-Lauch-Sugo und Kräuterkartoffeln" },
+      "2026-06-27": { menu1: "„Gaisburger Marsch“ Leichte Gemüsesuppe mit Spätzle", vegetarisch: "„Gazpacho“ Spanische kalte Gemüsesuppe" },
+      "2026-06-28": { menu1: "Kalbsgeschnetzeltes mit gemischten Pilzen auf Kräuternudeln", vegetarisch: "Gemüselasagne" },
+      "2026-06-29": { menu1: "Spaghetti „Bolognese“", optional: "Italienische Hackbällchen", vegetarisch: "Rosmarinkartoffeln mit mediterranem Gemüse und Kräuterdipp" },
+      "2026-06-30": { menu1: "Puten-Gemüse-Ragout mit Dampfkartoffeln", vegetarisch: "Pilz-Vollkorn-Bratling an Kräutersoße und Brokkoli" },
+      "2026-07-01": { menu1: "Rinderbratwurst an Bratensoße, Erbsengemüse und Kartoffelpüree", optional: "Kabeljaufilet", vegetarisch: "Indisches Kichererbsen Dal" },
+      "2026-07-02": { menu1: "Rinderbraten mit Dijonsenfsoße, bunte Möhren und Vollkornpenne", optional: "Tofu-Gemüse-Spieß auf Gemüsecouscous", vegetarisch: "Überbackenes Blumenkohlschnitzel auf Gemüsecouscous" },
+      "2026-07-03": { menu1: "Fischfilet an Salsasoße, Mangoldgemüse und Bandnudeln", vegetarisch: "Nudel-Gemüse-Auflauf an Petersiliensoße" },
+      "2026-07-04": { menu1: "„Pichelsteiner Eintopf“ mit Geflügelwurst", vegetarisch: "Minestrone mit Joghurtklecks" },
+      "2026-07-05": { menu1: "Rindergeschnetzeltes mit Paprika und Wildreis", vegetarisch: "Käsespätzle mit Schmorzwiebeln" }
     }
   },
   tage: [
@@ -453,6 +479,19 @@ var PLAN_DEFAULT = {
     return (dow === 'Sa' || dow === 'So') ? (e.wochenende || e.werktag) : (e.werktag || ESSEN_DEFAULT.werktag);
   }
   function mealAt(min, set){ for (var i=0;i<set.length;i++){ if (min >= toMin(set[i].von) && min < toMin(set[i].bis)) return set[i]; } return null; }
+  function menuFor(iso){ var sp = (PLAN.meta && PLAN.meta.speiseplan) || {}; return sp[iso] || null; }
+  // Menü-Zeilen fürs Inline-Aufklappen: Menü 1 (ohne Schweinefleisch), Vegetarisch, ggf. Optional.
+  function menuItemsHtml(m){
+    function item(label, dish, cls, dotCol){
+      return '<div class="menu-item ' + cls + '"><div class="ml"><span class="dot" style="background:' + dotCol + '"></span>'
+        + label + '</div><div class="md">' + escHtml(dish) + '</div></div>';
+    }
+    var s = '';
+    if (m.menu1)       s += item('Menü 1 · ohne Schweinefleisch', m.menu1, 'm1', 'var(--meal)');
+    if (m.vegetarisch) s += item('Vegetarisch', m.vegetarisch, 'veg', '#6fd08c');
+    if (m.optional)    s += item('Optional', m.optional, 'opt', 'var(--accent)');
+    return s;
+  }
 
   // Datum-Helfer
   function todayISO(){ try { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch(e){ return null; } }
@@ -461,7 +500,7 @@ var PLAN_DEFAULT = {
 
   // Aktiver Plan + abgeleitete Wochenleiste (werden in applyPlan gesetzt).
   var WD = ['Mo','Di','Mi','Do','Fr','Sa'];
-  var PLAN = PLAN_DEFAULT, DAYS = [], active = 0, firstApply = true;
+  var PLAN = PLAN_DEFAULT, DAYS = [], active = 0, firstApply = true, menuOpen = false;
 
   function renderTabs(){
     daysEl.innerHTML = '';
@@ -549,19 +588,28 @@ var PLAN_DEFAULT = {
     var mealCap = (tag.dow === 'Sa' || tag.dow === 'So') ? 'Essenszeiten · Sa/So' : 'Essenszeiten · Mo–Fr';
     var actMeal = isToday ? meal : null;
     function hm(s){ return String(s).replace(/^0/, ''); }
+    var hasMenu = !!menuFor(tag.datum);
     h += '<div class="meals"><div class="mcap">' + mealCap + '</div><div class="mrow">';
     set.forEach(function(M){
       var on = (actMeal && M === actMeal) ? ' active' : '';
-      h += '<div class="chip' + on + '"><div class="mn"><span class="dot"></span>' + escHtml(M.name) + '</div>'
-         + '<div class="mt">' + hm(M.von) + '–' + hm(M.bis) + '</div></div>';
+      var tappable = (M.name === 'Mittag') && hasMenu;   // Speiseplan nur wenn Menü hinterlegt
+      h += '<div class="chip' + on + (tappable ? ' mittag' : '') + (tappable && menuOpen ? ' open' : '') + '"><div class="mn"><span class="dot"></span>' + escHtml(M.name) + '</div>'
+         + '<div class="mt">' + hm(M.von) + '–' + hm(M.bis) + '</div>'
+         + (tappable ? '<span class="tap">Speiseplan ' + (menuOpen ? '⌄' : '›') + '</span>' : '') + '</div>';
     });
-    h += '</div></div>';
+    h += '</div>';                                          // .mrow
+    if (hasMenu && menuOpen) h += '<div class="menu-inline">' + menuItemsHtml(menuFor(tag.datum)) + '</div>';
+    h += '</div>';                                          // .meals
     todayEl.innerHTML = h;
+    // Mittags-Chip tippen → Speiseplan inline in der Karte auf-/zuklappen
+    var mchip = todayEl.querySelector('.chip.mittag');
+    if (mchip) mchip.addEventListener('click', function(){ menuOpen = !menuOpen; renderTodayCard(); });
   }
 
   function renderDay(){
     var tag = DAYS[active];
     listEl.innerHTML = '';
+    menuOpen = false;                 // Speiseplan-Aufklappen bei Tageswechsel zurücksetzen
     renderTodayCard();
     if (!tag){ return; }
     dayTitle.textContent = DOW_LANG[tag.dow] || tag.dow;
