@@ -4,6 +4,13 @@ Anweisung für Claude in genau diesem Projekt. Ergänzt die globale
 `~/.claude/CLAUDE.md`. Wenn Thomas hier eine neue Session öffnet, weißt du
 damit sofort, was Sache ist und was bei einem neuen Ausdruck zu tun ist.
 
+## Aktueller Stand (Stand 2026-06-26) — WICHTIG für neue Session
+Fertig und gepusht: Heute-Karte, Essenszeiten, Belohnungs-Effekte, **Essens-Chips
+mit leuchtender Pause**, **Mittags-Speiseplan (klappt inline auf)**, **Überfällig in
+Rot**. `main` bei `005b3e4`. Working Tree trägt nur noch den **geparkten Dörthe-Diff**
+(Easteregg-Code in `index.html` + `Archiv/Mockups/dorthe/`, untracked). Details zum
+Dörthe-Stand in der Auto-Memory `trainingsplan-dashboard`.
+
 ## Was das ist
 Ein **mobiles Terminplan-Dashboard** (iPhone-15-optimiert) für Thomas'
 Reha-Trainingsplan. Eine einzige self-contained `index.html` (CSS + JS inline,
@@ -22,6 +29,12 @@ kein Internet/keine Abhängigkeiten) im Liquid-Glass-Stil.
   Orientierungskarte** (SVG) als Vollbild-Overlay: der Ziel-Trakt leuchtet.
 - Hell/Dunkel-Umschalter, Fortschrittsanzeige pro Tag.
 - Belohnungs-Effekte: Konfetti beim Abhaken, Feuerwerk bei komplettem Tag (keine Text-Einblendung, keine Icons/Emojis).
+- **Essens-Chips** unter dem Zeitband: drei Chips (Frühstück/Mittag/Abend) mit den
+  exakten Von–Bis-Zeiten; am heutigen Tag leuchtet die gerade laufende Pause bernstein.
+- **Mittags-Speiseplan:** Mittags-Chip antippen → Tagesmenü klappt inline in der Karte
+  auf (Menü 1 ohne Schweinefleisch, Vegetarisch, ggf. Optional). Nur wenn Menü hinterlegt.
+- **Überfällig in Rot:** offene Termine, deren Zeit vorbei ist (nächster schon dran,
+  Haken vergessen), werden rot markiert — Karte, Zeitband-Punkt, „N überfällig"-Pille.
 
 ## WICHTIG: Privatsphäre (Repo ist öffentlich!)
 Es dürfen **nur** Zeit, Leistung und Raum rein. NIE in die Datei / ins Repo:
@@ -93,10 +106,14 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
   - `.appt.overdue` (bernstein „überfällig") = offener Termin, dessen Zeit vorbei
     ist und der nicht (mehr) läuft.
   Abgehakte Karten (`.appt.done`) bleiben unberührt.
-- **Überfällig sichtbar machen:** Heute-Karte zeigt eine Zeile „N überfällig" +
+- **Überfällig sichtbar machen (ROT):** Heute-Karte zeigt eine Zeile „N überfällig" +
   frühesten offenen Rückstand (Pill `.pill.due`); im Zeitband wird ein überfälliger
-  Termin zum *bernsteinfarbenen, hohlen Punkt* (`.rdot.overdue`, voll deckend, anders
-  als der gedimmte „erledigt"-Ring). Bewusst Warn-Bernstein (`--warn`), kein Alarm-Rot.
+  Termin zum *roten, hohlen Punkt* (`.rdot.overdue`), die Listen-Karte bekommt roten
+  Rahmen + rote Uhrzeit + „überfällig"-Pille (`.appt.overdue`). Farbe zentral über
+  `--warn` (wird ausschließlich für „überfällig" genutzt) = iOS systemRed: dunkel
+  `#ff453a`, hell `#d70015`. **Hinweis:** früher war das bewusst Warn-Bernstein; am
+  2026-06-26 auf ausdrücklichen Wunsch auf Alarm-Rot umgestellt. „Überfällig" heißt:
+  Termin offen, Zeit vorbei, läuft nicht (mehr) — Slot-Modell, nächster ist schon dran.
 - **Stand im Kopf:** Die Wochenzeile zeigt zusätzlich „· Stand TT.MM." aus
   `meta.stand` (Footer trägt weiterhin den vollen „Stand … · Ausdruck …"-Text).
 - **Erledigte Termine im Zeitband:** ein abgehakter Termin erscheint als
@@ -113,6 +130,33 @@ Unter dem Tageskopf sitzt die Heute-Karte (`renderTodayCard` in `index.html`):
   im Code greift, falls das Feld fehlt.
 - Kollision = Termin-Startzeit liegt in einem Essensfenster (Termine haben keine
   Dauer). Das Zeitband zeigt die Überschneidung optisch.
+
+## Essens-Chips & Mittags-Speiseplan
+Unter dem Zeitband sitzen drei **Essens-Chips** (Frühstück/Mittag/Abend, Funktion
+`renderTodayCard`, CSS `.today .meals/.chip`). Sie zeigen die **exakten Von–Bis-Zeiten**
+des jeweiligen Tages (Werktag- bzw. Wochenend-Satz, je gewähltem Tag). Am heutigen Tag
+**leuchtet** der Chip der gerade laufenden Pause bernstein + sanfter Puls (`@keyframes
+mealPulse`), abgeleitet aus dem vorhandenen `mealAt`. An anderen Tagen leuchtet nichts.
+
+**Mittags-Speiseplan (klappt inline auf, KEIN Overlay — Thomas' ausdrücklicher Wunsch):**
+- Gibt es für das Tagesdatum ein Menü, ist der **Mittags-Chip antippbar** (Hinweis
+  „Speiseplan ›"). Tippen klappt das Tagesmenü **direkt in der Karte** auf (`.menu-inline`),
+  nochmal tippen schließt; Tageswechsel schließt automatisch (State `menuOpen`, Reset in
+  `renderDay`). Funktionen: `menuFor(iso)`, `menuItemsHtml(m)`.
+- Gezeigt wird **Menü 1 · ohne Schweinefleisch**, **Vegetarisch**, und **Optional**
+  (nur wenn vorhanden). Wortgetreu **vegetarisch**, NICHT vegan (Klinik nennt es
+  „Menü 3 (vegetarisch)"; niemals zu „vegan" umdeuten).
+
+**Daten — `meta.speiseplan` in `plan.json` (+ gespiegelt in `PLAN_DEFAULT`):** ein
+Objekt, **datums-gekoppelt** per ISO-Datum. Pro Tag bis zu drei Felder:
+`{ "menu1": "…", "optional": "…", "vegetarisch": "…" }` (`optional` weglassen, wenn leer).
+So funktioniert es auch an Sa/So, die keine Termine haben und nicht in `tage[]` stehen.
+
+**Speiseplan aktualisieren (neuer Aushang/PDF):** Quelle in `Eingang/` ablegen (Foto/PDF),
+auslesen, je Tag einen Eintrag in `meta.speiseplan` ergänzen — **beide Stellen synchron**
+(`plan.json` + `PLAN_DEFAULT`). Spaltenlogik des Aushangs: Menü 1 (schweinefleischfrei) ·
+optional · Menü 3 (vegetarisch). Danach Quelle nach `Termine/Speiseplaene/` archivieren
+(gitignored, nie ins öffentliche Repo). Datenschutz: ein Speiseplan ist unkritisch.
 
 ## Belohnungs-Effekte (Konfetti + Feuerwerk)
 Canvas-Overlay `#fx` + Partikel-Engine inline in `index.html` (keine Library). Konfetti
