@@ -696,7 +696,8 @@ var PLAN_DEFAULT = {
     set.forEach(function(M){
       var on = (actMeal && M === actMeal) ? ' active' : '';
       var tappable = (M.name === 'Mittag') && hasMenu;   // Speiseplan nur wenn Menü hinterlegt
-      h += '<div class="chip' + on + (tappable ? ' mittag' : '') + (tappable && menuOpen ? ' open' : '') + '"><div class="mn"><span class="dot"></span>' + escHtml(M.name) + '</div>'
+      var mLabel = (M.name === 'Abendessen') ? 'Abend' : M.name;   // Chip-Label kurz halten (passt am iPhone)
+      h += '<div class="chip' + on + (tappable ? ' mittag' : '') + (tappable && menuOpen ? ' open' : '') + '"><div class="mn"><span class="dot"></span>' + escHtml(mLabel) + '</div>'
          + '<div class="mt">' + hm(M.von) + '–' + hm(M.bis) + '</div>'
          + (tappable ? '<span class="tap">Speiseplan ' + (menuOpen ? '⌄' : '›') + '</span>' : '') + '</div>';
     });
