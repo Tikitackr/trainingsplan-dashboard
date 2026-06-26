@@ -8,7 +8,9 @@ damit sofort, was Sache ist und was bei einem neuen Ausdruck zu tun ist.
 Fertig und gepusht: Heute-Karte, Essenszeiten, Belohnungs-Effekte, **Essens-Chips
 mit leuchtender Pause**, **Mittags-Speiseplan (klappt inline auf)**, **Überfällig in
 Rot**, **Mehr-Wochen-Umschaltung übers Kalender-Icon + Sonntag (Mo–So)**. Zwei Wochen
-im Plan: 22.–28.06. und 29.06.–05.07. Working Tree trägt nur noch den **geparkten
+im Plan: 22.–28.06. und 29.06.–05.07. **Essens-Chips am iPhone-Layout gefixt** (Uhrzeit
+lief über → `-webkit-text-size-adjust:100%` gegen iOS-Text-Inflation + Mobil-Media-Query
+`≤480px` mit kompakteren Chips; Label „Abendessen"→„Abend"). Working Tree trägt nur noch den **geparkten
 Dörthe-Diff** (Easteregg-Code in `index.html` + `Archiv/Mockups/dorthe/`, untracked).
 Details zum Dörthe-Stand in der Auto-Memory `trainingsplan-dashboard`.
 
