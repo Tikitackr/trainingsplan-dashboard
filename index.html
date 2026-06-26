@@ -67,6 +67,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: var(--text); background: var(--bg-1); line-height: 1.55;
     -webkit-font-smoothing: antialiased; min-height: 100vh;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;   /* iOS: kein Auto-Vergrößern → iPhone = Web */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   body::before {
@@ -194,6 +195,14 @@
   .today .chip .tap { display: block; font-size: 9.5px; font-weight: 700; letter-spacing: .02em; color: var(--accent); margin-top: 4px; }
   .today .chip.active .tap { color: var(--meal); }
   [data-theme="light"] .today .chip.active .tap { color: #9a5a00; }
+  /* Schmale iPhone-Breite: Chips kompakter, damit die Uhrzeit sicher in den Chip passt
+     (auf iOS rendert SF Pro etwas breiter). Desktop/Web bleibt unverändert. */
+  @media (max-width: 480px){
+    .today .meals .mrow { gap: 5px; }
+    .today .chip { padding: 8px 5px; }
+    .today .chip .mn { font-size: 10px; }
+    .today .chip .mt { font-size: 12px; letter-spacing: -.02em; }
+  }
 
   /* ---- Speiseplan: klappt inline in der Heute-Karte auf ---- */
   .today .menu-inline { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
