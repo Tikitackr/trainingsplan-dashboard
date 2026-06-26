@@ -7,9 +7,24 @@ damit sofort, was Sache ist und was bei einem neuen Ausdruck zu tun ist.
 ## Aktueller Stand (Stand 2026-06-26) — WICHTIG für neue Session
 Fertig und gepusht: Heute-Karte, Essenszeiten, Belohnungs-Effekte, **Essens-Chips
 mit leuchtender Pause**, **Mittags-Speiseplan (klappt inline auf)**, **Überfällig in
-Rot**. `main` bei `005b3e4`. Working Tree trägt nur noch den **geparkten Dörthe-Diff**
-(Easteregg-Code in `index.html` + `Archiv/Mockups/dorthe/`, untracked). Details zum
-Dörthe-Stand in der Auto-Memory `trainingsplan-dashboard`.
+Rot**, **Mehr-Wochen-Umschaltung übers Kalender-Icon + Sonntag (Mo–So)**. Zwei Wochen
+im Plan: 22.–28.06. und 29.06.–05.07. Working Tree trägt nur noch den **geparkten
+Dörthe-Diff** (Easteregg-Code in `index.html` + `Archiv/Mockups/dorthe/`, untracked).
+Details zum Dörthe-Stand in der Auto-Memory `trainingsplan-dashboard`.
+
+**Wichtig fürs Datenmodell:** `plan.json` hält jetzt ein **`wochen[]`-Array** (nicht
+mehr eine einzelne Woche). `meta` ist global (`essenszeiten`, `speiseplan`, beide
+datums-/wochenend-gekoppelt). Jede Woche: `{ woche, stand, quelle, tage[] }`. Beim
+neuen Ausdruck wird **eine Woche ergänzt, NICHT überschrieben** (alte bleibt erhalten).
+
+**Kalender-Icon oben links (`.header .logo`, `id="calBtn"`) = Wochen-Umschalter:**
+antippen blättert eine Woche weiter (rotiert durch alle). App startet immer auf der
+**aktuellen** Woche (die mit „heute", `pickCurrentWeek`); kein Auto-Reset-Timer, keine
+Persistenz der Auswahl (`activeWeek` wird nicht gespeichert; `userWeekPick`-Flag). Auf
+einer anderen Woche: Icon-Klasse `.logo.active` (Rückkehr-Punkt) + Label „· andere
+Woche"; Live-Uhr/„jetzt" entfällt automatisch (kein Tag = heute). **Achtung Dörthe:**
+das 5×-Tap-Easteregg hängt am selben Icon — beim späteren Mergen beide Tap-Verhalten
+am `calBtn` vereinen (einzeltap = Woche, 5× schnell = Dörthe).
 
 ## Was das ist
 Ein **mobiles Terminplan-Dashboard** (iPhone-15-optimiert) für Thomas'
@@ -21,7 +36,10 @@ kein Internet/keine Abhängigkeiten) im Liquid-Glass-Stil.
 - **Lokal:** `~/Projekte/Trainingsplan/`
 
 ## Funktionen
-- Tag-Umschalter (Mo/Di/Mi/Do …), aktueller Tag wird automatisch vorgewählt.
+- **Wochen-Umschalter (Kalender-Icon oben links):** antippen blättert eine Woche
+  weiter (rotiert durch alle Wochen in `wochen[]`). Start immer auf der aktuellen
+  Woche; auf einer anderen Woche ist das Icon hervorgehoben + Label „· andere Woche".
+- Tag-Umschalter (Mo/Di/Mi/Do …/So), aktueller Tag wird automatisch vorgewählt.
 - Termine als Karten: Antippen = erledigt (durchgestrichen + gedimmt).
   Häkchen werden pro `Datum|Zeit|Name` in `localStorage` gespeichert → bleiben
   bei einem neuen Ausdruck erhalten, solange Datum/Zeit/Name gleich bleiben.
@@ -49,17 +67,22 @@ Dann:
 
 1. **Lesen:** Termine vom Scan in `Update-Termine/` ablesen (Zeit, Leistung,
    Raum, ggf. Hinweis). Privatdaten (siehe oben) ignorieren.
-2. **Daten anpassen — `plan.json` ist die Quelle.** Termine in `plan.json`
-   eintragen. Dann denselben Stand in den Fallback-Block `var PLAN_DEFAULT = {…}`
-   in `index.html` spiegeln (klar markiert „DATENBLOCK"/„ENDE DATENBLOCK").
-   **Beide synchron halten.** CSS/JS sonst nicht anfassen.
-   - `meta.woche` = neuer Anzeige-Zeitraum; `meta.stand` = heute;
-     `meta.quelle` = Ausdruck-Datum.
+2. **Daten anpassen — `plan.json` ist die Quelle.** Eine **neue Woche als weiteres
+   Objekt in `wochen[]` ERGÄNZEN** (alte Wochen bleiben erhalten, NICHT überschreiben).
+   Dann denselben Stand in den Fallback-Block `var PLAN_DEFAULT = {…}` in `index.html`
+   spiegeln (klar markiert „DATENBLOCK"/„ENDE DATENBLOCK"). **Beide synchron halten**
+   (Check: `JSON.stringify(PLAN_DEFAULT) === plan.json`). CSS/JS sonst nicht anfassen.
+   - Struktur: `{ "meta": { essenszeiten, speiseplan }, "wochen": [ { woche, stand,
+     quelle, tage[] }, … ] }`. `meta` global; pro Woche `woche` = Anzeige-Zeitraum
+     (z. B. "29. Juni – 5. Juli 2026"), `stand` = heute, `quelle` = Ausdruck-Datum.
    - Pro Tag ein Eintrag in `tage[]`: `datum` (ISO "YYYY-MM-DD"), `dow`
-     (Mo/Di/…), `termine[]` mit `zeit` ("HH:MM"), `name`, `raum`, optional `note`.
-   - **Tab-Leiste ist fest Mo–Sa.** Nur Tage MIT Terminen eintragen; leere Tage
-     (z. B. Fr/Sa) erscheinen automatisch mit „Keine Termine". Datumszahlen der
-     leeren Tage werden aus dem Montag berechnet.
+     (Mo/Di/…/So), `termine[]` mit `zeit` ("HH:MM"), `name`, `raum`, optional `note`.
+   - **Tab-Leiste ist fest Mo–So** (Sonntag inklusive). Nur Tage MIT Terminen
+     eintragen; leere Tage (z. B. Sa/So) erscheinen automatisch mit „Keine Termine".
+     Datumszahlen der leeren Tage werden aus dem Montag berechnet.
+   - **Welche Woche zeigt die App?** Beim Start die aktuelle (die mit „heute"); per
+     Kalender-Icon blättert man weiter. Alte Wochen also ruhig behalten — sie sind
+     übers Icon erreichbar und stören die Standardansicht nicht.
    - **Schlüssel-Stabilität:** Häkchen hängen an `datum|zeit|name`. Bleiben diese
      drei Felder gleich, bleibt das Häkchen erhalten. Neue/geänderte Termine
      starten leer — so gewollt.
@@ -71,9 +94,11 @@ Dann:
 5. **Scan archivieren:** abgearbeiteten Scan von `Update-Termine/` nach
    `Termine/<datum>_Ausdruck/` verschieben.
 6. **Committen + pushen** (erst nach Thomas' Freigabe — er ist Dirigent):
-   `git add -A && git commit -m "Plan aktualisiert: <Zeitraum>" && git push`
-   GitHub Pages baut automatisch neu (~1 Min). Das iPhone zieht `plan.json`
-   beim nächsten Öffnen frisch (Cache-Bust), neue Termine erscheinen automatisch.
+   **Gezielt stagen, KEIN `git add -A`**, solange der Dörthe-Diff im Working Tree
+   geparkt ist: `git add plan.json index.html CLAUDE.md && git commit -m "Plan
+   aktualisiert: <Zeitraum>" && git push`. GitHub Pages baut automatisch neu (~1 Min).
+   Das iPhone zieht `plan.json` beim nächsten Öffnen frisch (Cache-Bust), neue
+   Termine erscheinen automatisch.
 
 ## Daten-Laden & Cache (warum Updates ohne Cache-Löschen ankommen)
 - **`plan.json`** = Live-Termine. Die App lädt sie beim Start frisch mit

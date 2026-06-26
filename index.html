@@ -96,8 +96,12 @@
     backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--glass-border);
   }
-  .header .logo { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; background: var(--grad); border-radius: 11px; color: #fff; box-shadow: 0 4px 14px rgba(10,132,255,0.4); }
+  .header .logo { position: relative; width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; background: var(--grad); border-radius: 11px; color: #fff; box-shadow: 0 4px 14px rgba(10,132,255,0.4); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: box-shadow .2s, transform .1s; }
+  .header .logo:active { transform: scale(0.94); }
   .header .logo svg { width: 22px; height: 22px; }
+  /* Andere als die aktuelle Woche angezeigt: Icon hervorgehoben + Rückkehr-Punkt */
+  .header .logo.active { box-shadow: 0 0 0 2px var(--warn), 0 4px 14px rgba(10,132,255,0.4); }
+  .header .logo.active::after { content: ''; position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; background: var(--warn); border: 2px solid var(--panel); }
   .header .titles { flex: 1 1 auto; min-width: 0; }
   .header .titles .t { font-weight: 700; font-size: 17px; line-height: 1.2; }
   .header .titles .s { color: var(--muted); font-size: 12.5px; }
@@ -309,7 +313,7 @@
   <canvas id="fx"></canvas>
   <div class="wrap">
     <div class="header">
-      <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2v4M16 2v4M8.5 14l2 2 4-4"/></svg></span>
+      <span class="logo" id="calBtn" role="button" tabindex="0" aria-label="Woche wechseln" title="Woche wechseln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2.5"/><path d="M3 9h18M8 2v4M16 2v4M8.5 14l2 2 4-4"/></svg></span>
       <div class="titles">
         <div class="t">Trainingsplan</div>
         <div class="s" id="weeklabel"></div>
@@ -368,7 +372,6 @@
    ===================================================================== */
 var PLAN_DEFAULT = {
   meta: {
-    woche: "22.–27. Juni 2026", stand: "2026-06-24", quelle: "Ausdruck 24.06.2026",
     essenszeiten: {
       werktag:    [ {name:"Frühstück",von:"07:15",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:45"}, {name:"Abendessen",von:"17:00",bis:"18:30"} ],
       wochenende: [ {name:"Frühstück",von:"07:30",bis:"09:00"}, {name:"Mittag",von:"11:30",bis:"12:30"}, {name:"Abendessen",von:"17:00",bis:"18:15"} ]
@@ -386,7 +389,8 @@ var PLAN_DEFAULT = {
       "2026-07-05": { menu1: "Rindergeschnetzeltes mit Paprika und Wildreis", vegetarisch: "Käsespätzle mit Schmorzwiebeln" }
     }
   },
-  tage: [
+  wochen: [
+  { woche: "22.–28. Juni 2026", stand: "2026-06-24", quelle: "Ausdruck 24.06.2026", tage: [
     { datum: "2026-06-22", dow: "Mo", termine: [
       { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
       { zeit: "10:40", name: "Hydrojetmassage", raum: "Trakt C/E0 · Therapiebereich 1" },
@@ -422,6 +426,43 @@ var PLAN_DEFAULT = {
       { zeit: "11:30", name: "Ergometertraining", raum: "Trakt E/E0 · Therapiebereich 3 · Ergometer" },
       { zeit: "13:30", name: "Atem- und Muskelentspannung", raum: "Trakt C/E · 2/0058 · Gesellschaftsraum" }
     ]}
+  ] },
+  { woche: "29. Juni – 5. Juli 2026", stand: "2026-06-26", quelle: "Ausdruck 26.06.2026", tage: [
+    { datum: "2026-06-29", dow: "Mo", termine: [
+      { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { zeit: "10:30", name: "Ergometertraining", raum: "Trakt E/E0 · Therapiebereich 3 · Ergometer" },
+      { zeit: "13:00", name: "Kraftausdauertraining", raum: "Trakt E/E-1 · Therapiebereich 4 · R. 4006", note: "Handtuch mitbringen." },
+      { zeit: "15:00", name: "Wärmepackung", raum: "Trakt C/E0 · Therapiebereich 1" }
+    ]},
+    { datum: "2026-06-30", dow: "Di", termine: [
+      { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { zeit: "10:30", name: "Ergometertraining", raum: "Trakt E/E0 · Therapiebereich 3 · Ergometer" },
+      { zeit: "11:40", name: "Hydrojetmassage", raum: "Trakt C/E0 · Therapiebereich 1" },
+      { zeit: "14:15", name: "Atem- und Muskelentspannung", raum: "Trakt C/E · 2/0058 · Gesellschaftsraum" }
+    ]},
+    { datum: "2026-07-01", dow: "Mi", termine: [
+      { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { zeit: "10:30", name: "Gymnastik HWS/LWS", raum: "Trakt D/E0 · Therapiebereich 2 · Gymn.halle", note: "Handtuch und Trainingsjacke mitbringen." },
+      { zeit: "11:30", name: "Atem- und Muskelentspannung", raum: "Trakt C/E · 2/0058 · Gesellschaftsraum" },
+      { zeit: "13:00", name: "Mittlere Wanderung (max. 60 Min.)", raum: "Trakt E/E0 · Therapiebereich 3", note: "Wetterfeste Kleidung mitbringen." },
+      { zeit: "15:00", name: "Ergometertraining", raum: "Trakt E/E0 · Therapiebereich 3 · Ergometer" }
+    ]},
+    { datum: "2026-07-02", dow: "Do", termine: [
+      { zeit: "07:10", name: "Ergometertraining", raum: "Trakt E/E0 · Therapiebereich 3 · Ergometer" },
+      { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { zeit: "10:20", name: "Visite", raum: "Trakt A/E · 2/200 · Station 2", note: "Therapieheft mitbringen." },
+      { zeit: "11:10", name: "Hydrojetmassage", raum: "Trakt C/E0 · Therapiebereich 1" },
+      { zeit: "14:00", name: "Kraftausdauertraining", raum: "Trakt E/E-1 · Therapiebereich 4 · R. 4006", note: "Handtuch mitbringen." }
+    ]},
+    { datum: "2026-07-03", dow: "Fr", termine: [
+      { zeit: "07:40", name: "Wärmepackung", raum: "Trakt C/E0 · Therapiebereich 1" },
+      { zeit: "08:55", name: "Übungsgruppe", raum: "Trakt E/E0 · Therapiebereich 3 · Sporthalle" },
+      { zeit: "10:00", name: "Vortrag: Altersvorsorge", raum: "Kesselhaus · EG Vortragssaal" },
+      { zeit: "11:30", name: "Gymnastik HWS/LWS", raum: "Trakt D/E0 · Therapiebereich 2 · Gymn.halle", note: "Handtuch und Trainingsjacke mitbringen." },
+      { zeit: "13:30", name: "Atem- und Muskelentspannung", raum: "Trakt C/E · 2/0058 · Gesellschaftsraum" },
+      { zeit: "14:30", name: "Ergometertraining", raum: "Trakt E/E0 · Therapiebereich 3 · Ergometer" }
+    ]}
+  ] }
   ]
 };
 /* ===================== ENDE DATENBLOCK ===================== */
@@ -455,6 +496,11 @@ var PLAN_DEFAULT = {
   function dayDone(tag){ return tag.termine.length > 0 && tag.termine.every(function(t){ return store.get(key(tag.datum, t.zeit, t.name)) === '1'; }); }
 
   var weeklabel = document.getElementById('weeklabel');
+  var calBtn = document.getElementById('calBtn');
+  if (calBtn){
+    calBtn.addEventListener('click', cycleWeek);
+    calBtn.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); cycleWeek(); } });
+  }
   var daysEl = document.getElementById('days');
   var dayTitle = document.getElementById('dayTitle');
   var dayProg = document.getElementById('dayProg');
@@ -497,10 +543,58 @@ var PLAN_DEFAULT = {
   function todayISO(){ try { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); } catch(e){ return null; } }
   function dateToISO(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
   function addDays(iso, n){ var p = iso.split('-'); var d = new Date(parseInt(p[0],10), parseInt(p[1],10)-1, parseInt(p[2],10)); d.setDate(d.getDate()+n); return dateToISO(d); }
+  // ISO-8601-Kalenderwoche aus einem ISO-Datum.
+  function isoWeekNum(iso){
+    var p = iso.split('-'); var d = new Date(Date.UTC(+p[0], +p[1]-1, +p[2]));
+    var day = d.getUTCDay() || 7; d.setUTCDate(d.getUTCDate() + 4 - day);
+    var ys = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - ys) / 86400000) + 1) / 7);
+  }
+
+  // ---- Mehr-Wochen-Modell ----
+  // Plan immer auf { meta:{essenszeiten,speiseplan}, wochen:[{woche,stand,quelle,tage}] }
+  // normalisieren. Alt-Format (meta + tage auf Top-Ebene, eine Woche) wird gewrappt,
+  // damit alte localStorage-Caches weiter funktionieren.
+  function normalizePlan(p){
+    if (!p) return { meta: {}, wochen: [] };
+    if (Array.isArray(p.wochen)){
+      return { meta: p.meta || {}, wochen: p.wochen };
+    }
+    var m = p.meta || {};
+    return {
+      meta: { essenszeiten: m.essenszeiten, speiseplan: m.speiseplan },
+      wochen: [ { woche: m.woche || '', stand: m.stand || '', quelle: m.quelle || '', tage: p.tage || [] } ]
+    };
+  }
+  // Montag (ISO) einer Woche aus dem ersten datierten Tag herleiten; null wenn keiner.
+  function mondayOfWeek(w){
+    var tage = (w && w.tage) || [];
+    for (var i = 0; i < tage.length; i++){
+      var off = WD.indexOf(tage[i].dow);
+      if (off >= 0 && /^\d{4}-\d{2}-\d{2}$/.test(tage[i].datum)) return addDays(tage[i].datum, -off);
+    }
+    return null;
+  }
+  // Index der „aktuellen" Woche: enthält heute → sonst nächste zukünftige → sonst letzte.
+  function pickCurrentWeek(wochen){
+    var today = todayISO(); if (!wochen.length) return 0;
+    var future = -1;
+    for (var i = 0; i < wochen.length; i++){
+      var mo = mondayOfWeek(wochen[i]); if (!mo) continue;
+      var so = addDays(mo, 6);
+      if (today >= mo && today <= so) return i;          // heute liegt in dieser Woche
+      if (mo > today && future < 0) future = i;          // erste Woche in der Zukunft
+    }
+    return future >= 0 ? future : wochen.length - 1;
+  }
 
   // Aktiver Plan + abgeleitete Wochenleiste (werden in applyPlan gesetzt).
-  var WD = ['Mo','Di','Mi','Do','Fr','Sa'];
-  var PLAN = PLAN_DEFAULT, DAYS = [], active = 0, firstApply = true, menuOpen = false;
+  var WD = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  var PLAN = normalizePlan(PLAN_DEFAULT), DAYS = [], active = 0, menuOpen = false;
+  // Mehr-Wochen-Umschaltung: activeWeek = angezeigte Woche, currentWeekIndex = die
+  // Woche mit „heute". userWeekPick wird true, sobald der Nutzer per Kalender-Icon
+  // blättert; bis dahin folgt activeWeek immer der aktuellen Woche (App-Start-Default).
+  var activeWeek = 0, currentWeekIndex = 0, userWeekPick = false;
 
   function renderTabs(){
     daysEl.innerHTML = '';
@@ -814,35 +908,62 @@ var PLAN_DEFAULT = {
   // im localStorage und bleiben dabei unangetastet.
   var PLAN_STORE_KEY = 'tp-' + PAGE + '-plandata';
 
-  function planValid(p){ return p && p.tage && p.tage.length >= 0 && p.meta; }
+  function planValid(p){
+    if (!p || !p.meta) return false;
+    if (Array.isArray(p.wochen)) return p.wochen.length > 0 && Array.isArray(p.wochen[0].tage);
+    return Array.isArray(p.tage);                     // Alt-Format (eine Woche)
+  }
   function planEqual(a, b){ try { return JSON.stringify(a) === JSON.stringify(b); } catch(e){ return false; } }
 
   function applyPlan(plan){
     if (!planValid(plan)) return;
-    PLAN = plan;
-    var _st = (PLAN.meta && PLAN.meta.stand) || '', _stTxt = '';
-    if (/^\d{4}-\d{2}-\d{2}$/.test(_st)){ var _p = _st.split('-'); _stTxt = ' · Stand ' + _p[2] + '.' + _p[1] + '.'; }
-    weeklabel.textContent = ((PLAN.meta && PLAN.meta.woche) || '') + _stTxt;
-    footer.innerHTML = 'Stand ' + ((PLAN.meta && PLAN.meta.stand) || '')
-      + (PLAN.meta && PLAN.meta.quelle ? ' · ' + PLAN.meta.quelle : '')
-      + ' · Häkchen werden auf diesem Gerät gespeichert.';
-    // Feste Wochenleiste Mo–Sa: Tage mit Terminen aus PLAN, leere Tage automatisch.
-    var byDow = {}; PLAN.tage.forEach(function(t){ byDow[t.dow] = t; });
-    var monday = null;
-    for (var i = 0; i < PLAN.tage.length; i++){
-      var off = WD.indexOf(PLAN.tage[i].dow);
-      if (off >= 0){ monday = addDays(PLAN.tage[i].datum, -off); break; }
+    PLAN = normalizePlan(plan);
+    currentWeekIndex = pickCurrentWeek(PLAN.wochen);
+    // Bis der Nutzer per Icon blättert, folgt die Anzeige der aktuellen Woche.
+    if (!userWeekPick) activeWeek = currentWeekIndex;
+    if (activeWeek < 0 || activeWeek >= PLAN.wochen.length) activeWeek = currentWeekIndex;
+    showWeek(activeWeek);
+  }
+
+  // Eine bestimmte Woche anzeigen: Kopf/Footer, Tagesleiste (Mo–So), Tag-Vorauswahl.
+  function showWeek(wi){
+    var w = PLAN.wochen[wi]; if (!w) return;
+    var isCur = (wi === currentWeekIndex);
+    var mo = mondayOfWeek(w);
+    var kw = mo ? ('KW ' + isoWeekNum(mo) + ' · ') : '';
+    var suffix = ' · andere Woche';
+    if (isCur){
+      suffix = '';
+      var _st = w.stand || '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(_st)){ var _p = _st.split('-'); suffix = ' · Stand ' + _p[2] + '.' + _p[1] + '.'; }
     }
+    weeklabel.textContent = kw + (w.woche || '') + suffix;
+    footer.innerHTML = 'Stand ' + (w.stand || '')
+      + (w.quelle ? ' · ' + w.quelle : '')
+      + ' · Häkchen werden auf diesem Gerät gespeichert.';
+    if (calBtn) calBtn.classList.toggle('active', !isCur);
+    // Feste Wochenleiste Mo–So: Tage mit Terminen aus der Woche, leere Tage automatisch.
+    var byDow = {}; (w.tage || []).forEach(function(t){ byDow[t.dow] = t; });
     DAYS = WD.map(function(dow, idx){
-      return byDow[dow] || { datum: monday ? addDays(monday, idx) : ('leer-' + dow), dow: dow, termine: [] };
+      return byDow[dow] || { datum: mo ? addDays(mo, idx) : ('leer-' + dow), dow: dow, termine: [] };
     });
-    if (firstApply){
-      var today = todayISO(); active = 0;
+    // Tag-Vorauswahl: aktuelle Woche → heute (falls darin), sonst Montag.
+    active = 0;
+    if (isCur){
+      var today = todayISO();
       for (var j = 0; j < DAYS.length; j++){ if (DAYS[j].datum === today){ active = j; break; } }
-      firstApply = false;
-    } else if (active >= DAYS.length){ active = 0; }
+    }
+    menuOpen = false;
     renderTabs();
     renderDay();
+  }
+
+  // Kalender-Icon antippen = eine Woche weiter (rotiert durch alle Wochen).
+  function cycleWeek(){
+    if (PLAN.wochen.length < 2) return;              // nur eine Woche → nichts zu blättern
+    userWeekPick = true;
+    activeWeek = (activeWeek + 1) % PLAN.wochen.length;
+    showWeek(activeWeek);
   }
 
   // 1) Sofort: zuletzt geladener Plan aus localStorage, sonst der eingebettete Default.
